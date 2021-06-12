@@ -1,0 +1,10 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "removeComments": true,
+    "lib":["es2016", "dom"]
+  },
+  "files": [
+    "script.ts"
+  ]
+}
