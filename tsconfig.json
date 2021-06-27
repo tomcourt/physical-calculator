@@ -2,7 +2,8 @@
   "compileOnSave": true,
   "compilerOptions": {
     "removeComments": true,
-    "lib":["es2016", "dom"]
+    "sourceMap": true,
+    "target": "ES2016"
   },
   "files": [
     "script.ts"

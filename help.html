@@ -1,5 +1,9 @@
-<a href="index.html">Done</a> <a href="todo.html" style="position:absolute; left:250px;" >Todo list</a>
-<span style="white-space: pre;">
+<a href="todo.html" >Todo list</a>
+<span style="white-space: pre; font-size:20px;">
+
+Install
+  To finish install on phone, click Send-To, Add to Home Screen. The calculator
+  should now fill the screen in landscape orientation.
 
 Introduction
 
@@ -55,6 +59,12 @@ Conversions
   (in this case mass) is pressed such as 'oz', the value will be converted to
   the new unit. This works for more complex units also, such as m/s being changed
   to mi/h.
+
+  Note - be careful with energy conversions, for example Joules (Watt Seconds) to
+  Watt Hours. You may try to simply press 'h' in units for hours to do so, this
+  will lead to non-sense results. Use 'list' to find Watt hours instead. This is
+  because Watt Seconds (kg m^2 s/s^3) is internally (kg m^2/s^2) and 'h' changes
+  the denominator factors when it should only change the (missing) numerator factor.
 
 Constants
 

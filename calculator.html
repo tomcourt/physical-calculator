@@ -1,16 +1,22 @@
+<!DOCTYPE html>
 <html>
 
-<head>
+ls<head>
+  <meta charset=utf-8 />
+  <meta name=viewport content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name=apple-mobile-web-app-capable content=yes>
+  <meta name=apple-mobile-web-app-status-bar-style content=black>
+  <title>Calculator</title>
   <link rel="stylesheet" href="style.css">
   <script src="script.js"></script>
-  <meta charset=utf-8 />
 </head>
 
-<body/>
+<body><div id=page>
+
   <table border="1" id="calculator">
     <caption id="message"></caption>
     <tr>
-      <td colspan="9" style="padding-left:10px;padding-right:10px"><p style="font-size:20" id="display"></p></td>
+      <td colspan="9" style="padding-left:10px;padding-right:10px" id="display"></td>
     </tr>
     <tr>
       <td><p class="button" mode-norm="CE/C" mode-2nd="CE/C" mode-unit="CE/C" mode-const="CE/C" onclick="keyButton()"></p></td>
@@ -43,7 +49,7 @@
       <td><p class="button" mode-norm="√x"   mode-2nd="³√x"  mode-unit=""     mode-const=""     onclick="keyButton()"></p></td>
     </tr>
     <tr>
-      <td><p class="button" mode-norm="cnst" mode-2nd="cnst" mode-unit="cnst" mode-const="cnst" id="cnst" onclick="keyButton()"></p></td>
+      <td><p class="button" mode-norm="cnst" mode-2nd="cnst" mode-unit=""     mode-const="cnst" id="cnst" onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm=""     mode-2nd=""     mode-unit="A"    mode-const=""     onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm="cos"  mode-2nd="cos⁻¹" mode-unit="V"   mode-const=""     onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm="1"    mode-2nd="1"    mode-unit="Ω"    mode-const=""     onclick="keyButton()"></p></td>
@@ -54,7 +60,7 @@
     </tr>
     <tr>
       <td><p class="button" mode-norm="unit" mode-2nd="unit" mode-unit="unit" mode-const=""     id="unit" onclick="keyButton()"></p></td>
-      <td><p class="button" mode-norm=""     mode-2nd=""     mode-unit="K"    mode-const="G"    onclick="keyButton()"></p></td>
+      <td><p class="button" mode-norm="help" mode-2nd=""     mode-unit="K"    mode-const="G"    onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm="tan" mode-2nd="tan⁻¹" mode-unit="°C"   mode-const="g₀"   onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm="0"    mode-2nd="0"    mode-unit="°F"   mode-const="M⊙"   onclick="keyButton()"></p></td>
       <td><p class="button" mode-norm="."    mode-2nd="."    mode-unit="cd"   mode-const="M🜨"   onclick="keyButton()"></p></td>
@@ -63,7 +69,6 @@
       <td><p class="button" mode-norm="list" mode-2nd="list" mode-unit="list" mode-const="list" id="list" onclick="keyButton()"></p></td>
     </tr>
   </table>
-  <a href="help.html" style="position:absolute; top:6px; left:6px;">Help</a>
 
   <div id="constTreeDiv" style="display:none"> <div style="display:inherit;">
   <input type="button" value="&#10005;" onclick="cancelTreeButton('const')" />
@@ -81,7 +86,7 @@
   </ul>
   </div> </div>
 
-  <div id="listDiv" style="display:none"> <div style="display:inherit;">
+  <div id="listDiv" style="display:none;"> <div style="display:inherit; position:relative; top:40px;">
     <span style="display:inline">
       <input type="button" value="&#10005;" onclick="cancelListButton()" />
       <input type="button" value="Exact"   id="exactButton"      onclick="exactListButton()" />
@@ -89,16 +94,18 @@
       <input type="button" value="Extra"   id="extraButton"      onclick="extraListButton()" />
       <input type="button" value="Implict" id="implicitButton"   onclick="implicitListButton()" />
       <input type="button" value="&#8678;" id="leftArrowButton"  onclick="leftArrowListButton()" />
-      <span id="pageListText">1 of 1</span>
+      <span id="pageListText" style="font-size: 28px;">1 of 1</span>
       <input type="button" value="&#8680;" id="rightArrowButton" onclick="rightArrowListButton()" />
     </span>
-    <table id="listView" border="1" width="410px" style="table-layout:fixed;">
-      <tr> <td colspan="2"> <p id="formula"></p> </td> </tr>
-      <tr> <td> <p id="list0"></p> </td> <td <p id="list5"></p> </td> </tr>
-      <tr> <td> <p id="list1"></p> </td> <td <p id="list6"></p> </td> </tr>
-      <tr> <td> <p id="list2"></p> </td> <td <p id="list7"></p> </td> </tr>
-      <tr> <td> <p id="list3"></p> </td> <td <p id="list8"></p> </td> </tr>
-      <tr> <td> <p id="list4"></p> </td> <td <p id="list9"></p> </td> </tr>
+    <table id="listView" border="1" width="800px" style="table-layout:fixed;">
+      <tr> <td colspan="2" id="formula">&nbsp</td> </tr>
+      <tr> <td id="list0">&nbsp</td> <td id="list5">&nbsp</td> </tr>
+      <tr> <td id="list1">&nbsp</td> <td id="list6">&nbsp</td> </tr>
+      <tr> <td id="list2">&nbsp</td> <td id="list7">&nbsp</td> </tr>
+      <tr> <td id="list3">&nbsp</td> <td id="list8">&nbsp</td> </tr>
+      <tr> <td id="list4">&nbsp</td> <td id="list9">&nbsp</td> </tr>
     </table>
   </div> </div>
+</div>
+</body>
 </html>

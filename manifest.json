@@ -1,0 +1,10 @@
+{
+  "name": "Physical Calculator",
+  "short_name": "Calculator",
+  "theme_color": "#fff",
+  "background_color": "#fff",
+  "display": "browser",
+  "orientation": "landscape",
+  "scope": "/",
+  "start_url": "http://www.tcourt.net/calculator.html"
+}
