@@ -447,6 +447,23 @@ class Measurement {
       this.unitNames = unitNames.slice()
   }
 
+  factor() : number {
+    var ret = 1
+    var unit = findUnit(this.unitPowers, this.complexUnits)
+    if (unit)
+      return unit.factor
+    for (var i=0; i<7; i++) {
+      if (this.unitPowers[i] != 0) {
+        var searchUnit = [0,0,0,0,0,0,0]
+        searchUnit[i] = 1  // search unit has a single unit type (mass, length, time, etc.)
+        unit = findUnit(searchUnit, this.unitNames[i])
+        if (unit)
+          ret *= unit.factor ** this.unitPowers[i]
+      }
+    }
+    return ret
+  }
+
   toString() : string {
     const superscripts = ['', '', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
     var unit : Unit
@@ -748,7 +765,7 @@ var knowns : Measurement[] = [new Measurement(0)]   // [0] is a placeholder for 
 
 
 // called when HTML loads
-window.onload = function() {
+window.onload = function () {
 // creates a new'd constructor that takes an array of arguments
   function create(constructor:Function, argList:any) {
     return new (Function.prototype.bind.apply(constructor, [null].concat(argList)))
@@ -757,9 +774,9 @@ window.onload = function() {
   listOfConstants = []
   for (var i=0; i<arrayOfConstants.length; i++)
     listOfConstants.push(create(Constant, arrayOfConstants[i]))
-
-  listOfUnits = []
-  for (var i=0; i<arrayOfUnits.length; i++)
+ 
+  listOfUnits = [] 
+  for (var i=0; i<arrayOfUnits.length; i++) 
     listOfUnits.push(create(Unit, arrayOfUnits[i]))
 
   listOfFormulas = []
@@ -768,10 +785,11 @@ window.onload = function() {
 
   fillTreeInHTML(listOfConstants, 'constTreeView', 'selectConstByName')
   fillTreeInHTML(listOfUnits,     'unitTreeView',  'selectUnitByName')
-
   clearButton(true)
   wireUpTreeTogglerInHTML()
   setButtonMode('mode-norm')
+
+  setupScroll()
 }
 
 
@@ -1262,7 +1280,7 @@ function findImplicitFormula() : Formulas[] {
   for (var i=1; i<knowns.length; i++) {
     var p = bestSolution[i]
     var m = 'k' + i.toString();
-    var units = new ShortUnits(undefined, knowns[0].unitPowers)
+    var units = new ShortUnits(undefined, knowns[i].unitPowers)
     vars.push(m + '=' + units.toString())
     if (Math.abs(p) == 1)
       m += ' * '
@@ -1308,17 +1326,17 @@ function findFormula() {
 
 
 function populateList() {
-  document.getElementById('pageListText').innerHTML = (inxFormulas+1).toString() + ' of ' + listedFormulas.length.toString()
-  document.getElementById('exactButton').disabled                = (exactFormulas.length == 0)
-  document.getElementById('exactButton').style.textDecoration    = ((listedFormulas === exactFormulas)       ? 'underline' : '')
-  document.getElementById('missingButton').disabled              = (missingTermFormulas.length == 0)
-  document.getElementById('missingButton').style.textDecoration  = ((listedFormulas === missingTermFormulas) ? 'underline' : '')
-  document.getElementById('extraButton').disabled                = (extraTermFormulas.length == 0)
-  document.getElementById('extraButton').style.textDecoration    = ((listedFormulas === extraTermFormulas)   ? 'underline' : '')
-  document.getElementById('implicitButton').disabled             = (implicitFormula.length == 0)
-  document.getElementById('implicitButton').style.textDecoration = ((listedFormulas === implicitFormula)     ? 'underline' : '')
-  document.getElementById('leftArrowButton').disabled            = (inxFormulas <= 0)
-  document.getElementById('rightArrowButton').disabled           = (inxFormulas >= listedFormulas.length-1)
+  document.getElementById('pageListText').innerHTML = (inxFormulas+1).toString() + ' of ' + listedFormulas.length.toString();
+  (<HTMLInputElement>document.getElementById('exactButton')).disabled                = (exactFormulas.length == 0)
+  document.getElementById('exactButton').style.textDecoration                        = ((listedFormulas === exactFormulas)       ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('missingButton')).disabled              = (missingTermFormulas.length == 0)
+  document.getElementById('missingButton').style.textDecoration                      = ((listedFormulas === missingTermFormulas) ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('extraButton')).disabled                = (extraTermFormulas.length == 0)
+  document.getElementById('extraButton').style.textDecoration                        = ((listedFormulas === extraTermFormulas)   ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('implicitButton')).disabled             = (implicitFormula.length == 0)
+  document.getElementById('implicitButton').style.textDecoration                     = ((listedFormulas === implicitFormula)     ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('leftArrowButton')).disabled            = (inxFormulas <= 0);
+  (<HTMLInputElement>document.getElementById('rightArrowButton')).disabled           = (inxFormulas >= listedFormulas.length-1)
 
   var formula = listedFormulas[inxFormulas]
   if (formula) {
@@ -1330,7 +1348,7 @@ function populateList() {
 
     document.getElementById('formula').innerHTML = formula.desc + ': ' + formula.prettyMatching()
     for (var i=0; i<9; i++)
-      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? knowns[i].formulaVar +' = ' + knowns[i].toString() : '')
+      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? knowns[i].formulaVar +' = ' + knowns[i].toString() : '&nbsp')
   }
   else {
     var unknown = ((knowns[0].nPowers() == 0) ? '0' : '1')
@@ -1339,7 +1357,7 @@ function populateList() {
     document.getElementById('formula').innerHTML = 'no formula found'
     document.getElementById('list0').innerHTML = 'u = ' + knowns[0].toString()
     for (var i=1; i<9; i++)
-      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? 'k'+i.toString() +' = ' + knowns[i].toString() : '')
+      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? 'k'+i.toString() +' = ' + knowns[i].toString() : '&nbsp')
   }
 }
 
@@ -1400,6 +1418,9 @@ function keyButton(evnt:Event): void {
     case 'cnst':
       setButtonMode((currentMode=='mode-const') ? "mode-norm" : "mode-const")
       break
+    case 'help':
+      window.open('help.html', '_blank')
+      break
     default:
       if (currentMode == 'mode-unit') {
         switch(elemt.innerHTML) {
@@ -1412,9 +1433,10 @@ function keyButton(evnt:Event): void {
             setDisplay(top.toString())
             break
           case '#':
+            top.value = top.value / top.factor()
             top.unitPowers = [0,0,0,0,0,0,0]
             top.unitNames = ['','','','','','','']
-            setDisplay(top.toString())
+            setDisplay(top.value.toString())
             break
           default:
             selectUnitByName(elemt.innerHTML,false)
@@ -1558,4 +1580,53 @@ function leftArrowListButton() {
   inxFormulas--
   populateList()
 }
-// <span id="pageListText">1 of 1</span>
+
+
+// FROM: https://gist.github.com/nateps/1172490
+if (navigator.userAgent.indexOf('Android') >= 0) {
+  window.onscroll = function() {
+    document.getElementById('page').style.height = window.innerHeight + 'px'
+  }
+}
+
+
+function setupScroll() {
+  // Start out by adding the height of the location bar to the width, so that
+  // we can scroll past it
+  var iphone = (navigator.userAgent.indexOf('iPhone') >= 0) || (navigator.userAgent.indexOf('iPod') >= 0)
+  var ipad = (navigator.userAgent.indexOf('iPad') >= 0)
+  if (iphone || ipad) {
+    // iOS reliably returns the innerWindow size for documentElement.clientHeight
+    // but window.innerHeight is sometimes the wrong value after rotating
+    // the orientation
+    var height = document.documentElement.clientHeight
+    // Only add extra padding to the height on iphone / ipod, since the ipad
+    // browser doesn't scroll off the location bar.
+    var fullscreen = (window.navigator['standalone'] == true)
+    if (iphone && !fullscreen)  // if iphone && !fullscreen
+      height += 60
+    document.getElementById('page').style.height = height + 'px'
+  }
+  else if (navigator.userAgent.indexOf('Android') >= 0) {
+    // The stock Android browser has a location bar height of 56 pixels, but
+    // this very likely could be broken in other Android browsers.
+    document.getElementById('page').style.height = (window.innerHeight + 56) + 'px'
+  }
+  // Scroll after a timeout, since iOS will scroll to the top of the page
+  // after it fires the onload event
+  setTimeout(scrollTo, 0, 0, 1)
+}
+// window.onload = setupScroll
+
+var lastWidth = 0
+function onResize() {
+  var pageWidth = document.getElementById('page').offsetWidth
+  // Android doesn't support orientation change, so check for when the width
+  // changes to figure out when the orientation changes
+  if (lastWidth == pageWidth)
+    return
+  lastWidth = pageWidth
+  setupScroll()
+}
+window.onresize = onResize
+// TODO, sample code seems to have this, but page doesn't seem loaded at this point so fails, onResize()
