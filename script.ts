@@ -222,6 +222,65 @@ const arrayOfFormula = [
       ['t=K', 'p=kg/m s2', 'n=mol', 'v=m3']],
 ]
 
+
+const arrayOfButtons = [
+  [
+    ["CE/C", "CE/C", "CE/C", "CE/C"],
+    ["π"   , "π"   , "m"   , "π"   ],
+    ["LN"  , "LOG" , "mm"  , "c"   ],
+    ["EE"  , "EE"  , "km"  , "h"   ],
+    ["("   , "("   , "ft"  , "ħ"   ],
+    [")"   , ")"   , "in"  , ""    ],
+    ["÷"   , "÷"   , "mi"  , "ε₀"  ],
+    ["¹/ₓ" , "¹/ₓ" , "1/UN", ""    ]
+  ],[
+    ["MODE", "MODE", "kwn" , ""    ],
+    ["STR" , "SUM" , "kg"  , "µ₀"  ],
+    ["eˣ"  , "10ˣ" , "g"   , "Z₀"  ],
+    ["7"   , "7"   , "mg"  , "e"   ],
+    ["8"   , "8"   , "lb"  , "L"   ],
+    ["9"   , "9"   , "oz"  , "k"   ],
+    ["×"   , "×"   , "gal" , ""    ],
+    ["yˣ"  , "ˣ√y" , "l"   , "R"   ]
+  ],[
+    ["2nd" , "2nd" , "unkn", ""    ],
+    ["RCL" , "EXCH", "s"   , ""    ],
+    ["SIN" ,"SIN⁻¹","min"  , ""    ],
+    ["4"   , "4"   , "h"   , ""    ],
+    ["5"   , "5"   , "d"   , ""    ],
+    ["6"   , "6"   , "yr"  , ""    ],
+    ["-"   , "-"   , ""    , ""    ],
+    ["√x"  , "³√x" , ""    , ""    ]
+  ],[
+    ["CNST", "CNST", ""    , "CNST"],
+    [""    , ""    , "A"   , ""    ],
+    ["COS" ,"COS⁻¹", "V"   , ""    ],
+    ["1"   , "1"   , "Ω"   , ""    ],
+    ["2"   , "2"   , "J"   , ""    ],
+    ["3"   , "3"   , "W"   , ""    ],
+    ["+"   , "+"   , "N"   , ""    ],
+    ["x²"  , "x³"  , "Pa"  , ""    ]
+  ],[
+    ["UNIT", "UNIT", "UNIT", ""    ],
+    [""    , ""    , "K"   , "G"   ],
+    ["TAN", "TAN⁻¹", "°C"  , "g₀"  ],
+    ["0"   , "0"   , "°F"  , "M⊙"  ],
+    ["."   , "."   , "cd"  , "M🜨"  ],
+    ["±"   , "±"   , "mol" , "au"  ],
+    ["="   , "="   , "#"   , "R🜨"  ],
+    ["LIST", "LIST", "LIST", "LIST"]
+  ]
+]
+
+var buttonElements = new Map( [
+  ['unit', undefined ],
+  ['list', undefined ],
+  ['cnst', undefined ],
+  ['2nd',  undefined ],
+  ['1/un', undefined ],
+])
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 function format(n:number) : string {
@@ -445,6 +504,10 @@ class Measurement {
     }
     else
       this.unitNames = unitNames.slice()
+  }
+
+  copy() : Measurement {
+    return new Measurement(this.value, this.unitPowers, this.unitNames, this.complexUnits, this.formulaVar)
   }
 
   factor() : number {
@@ -747,10 +810,11 @@ function findExactFormulas() : Formulas[] {
 
 var mantisa    = ''
 var exponent   = ''
-var entryMode  = "number"  // waiting for number to start to be entered
+var entryMode  = 'number'  // waiting for number to start to be entered
 
 var operators : string[] = []
 var operands  : Measurement[] = []
+var memory = new Measurement(0)
 
 var unitSign = 1
 var currentMode : string
@@ -792,15 +856,33 @@ window.onload = function () {
   setupScroll()
 }
 
+var landscapeMediaQuery = window.matchMedia("only screen and (orientation: landscape)")
+landscapeMediaQuery.addEventListener('change', function() { setButtonMode(currentMode) })
 
 function setButtonMode(newMode:string) {
-  // for each button on the HTML page, takes the text from 'attribute' and assigns it to the button to display
-  var buttons = document.getElementsByClassName("button")
-  for (var i = 0; i < buttons.length; i++)
-    if (buttons[i].getAttribute(newMode) == '')
-      buttons[i].innerHTML = '&nbsp;'   // filler to prevent empty buttons from looking tiny
-    else
-      buttons[i].innerHTML = buttons[i].getAttribute(newMode)
+  var modes = ['mode-norm', 'mode-2nd', 'mode-unit', 'mode-const']
+  var mInx = modes.indexOf(newMode)
+
+  for (var [key] of buttonElements)
+    buttonElements.set(key, undefined)
+
+  for (var i=0; i<5; i++)
+    for (var j=0; j<8; j++) {
+      var button : HTMLElement
+      if (landscapeMediaQuery.matches) // horizontal button arrangment (8 wide, 5 high)
+        button = document.getElementById('x'+j.toString()+'y'+i.toString())
+      else {                        // vertical button arrangment (8 high, 5 wide)
+        if ((newMode == 'mode-norm' || newMode == 'mode-2nd') && j >= 3)
+          button = document.getElementById('x'+(j-3).toString()+'y'+(i+3).toString())   // show number pad as in horizontal
+        else
+          button = document.getElementById('x'+i.toString()+'y'+j.toString())       // exchange rows for columns
+      }
+      button.innerHTML = arrayOfButtons[i][j][mInx]
+      // save special buttons for later reference
+      if (buttonElements.has(button.innerHTML.toLowerCase()))
+        buttonElements.set(button.innerHTML.toLowerCase(), button)
+    }  
+
   currentMode = newMode
   boldButton('cnst', false)
   boldButton('unit', false)
@@ -902,7 +984,7 @@ function digitButton(symbol : string) {
 
 
 function eeButton() {
-  if (entryMode == "number" || entryMode == "infix") {
+  if (entryMode == 'number' || entryMode == 'infix') {
     // toggle scientific and decimal modes
     var val = parseFloat(getDisplay());
     if (getDisplay().indexOf('E') == -1 &&
@@ -1052,10 +1134,10 @@ function infixButton(ch : string) {
         evaluateAtAndAbovePrecedence(-1) // evaluate all
         break
       default:
-        if (entryMode == "infix" && operators.length > 0)
+        if (entryMode == 'infix' && operators.length > 0)
           operators.pop()
         evaluateAtAndAbovePrecedence(precedence(ch))
-        entryMode = "infix"
+        entryMode = 'infix'
         operators.push(ch)
     }
     setDisplay(operands[operands.length-1].toString())
@@ -1079,8 +1161,8 @@ function clearButton(all:boolean)  {
   setDisplay('0')
   mantisa = ''
   exponent = ''
-  entryMode = "number"
-  setButtonMode("mode-norm")
+  entryMode = 'number'
+  setButtonMode('mode-norm')
 }
 
 
@@ -1120,7 +1202,7 @@ function selectUnitByName(name:string, tree:boolean=false)  {
   document.getElementById("calculator").hidden = false
 
   if (tree)
-    setButtonMode("mode-norm")
+    setButtonMode('mode-norm')
 }
 
 
@@ -1140,7 +1222,7 @@ function selectConstByName(button:string, tree:boolean=false) {
   document.getElementById("calculator").hidden = false
 
   if (tree)
-    setButtonMode("mode-norm")
+    setButtonMode('mode-norm')
 }
 
 
@@ -1365,7 +1447,7 @@ function populateList() {
 function toggleUnitMode() {
   finishEntry()
   if (currentMode == 'mode-unit')
-    setButtonMode("mode-norm")
+    setButtonMode('mode-norm')
   else
     setButtonMode("mode-unit")
   unitSign = 1
@@ -1375,8 +1457,8 @@ function toggleUnitMode() {
 
 
 function boldButton(name:string, bold: boolean) {
-  var id = document.getElementById(name)
-  id.style.fontWeight = (bold ? 'bold' : 'normal')
+  if (buttonElements.get(name))
+    buttonElements.get(name).style.fontWeight = (bold ? 'bold' : 'normal')
 }
 
 
@@ -1388,11 +1470,10 @@ function keyButton(evnt:Event): void {
   var elemt = (evnt.target || evnt.srcElement) as Element
   var top = operands[operands.length-1]
 
-  switch(elemt.innerHTML) {
-    case 'CE/C':
-      if (entryMode == "number" || entryMode == "infix") {
+  switch(elemt.innerHTML.toLowerCase()) {
+    case 'ce/c':
+      if (entryMode == 'number' || entryMode == 'infix')
         clearButton(true)
-      }
       else
         clearButton(false)
       break
@@ -1416,14 +1497,14 @@ function keyButton(evnt:Event): void {
       }
       break;
     case 'cnst':
-      setButtonMode((currentMode=='mode-const') ? "mode-norm" : "mode-const")
+      setButtonMode((currentMode=='mode-const') ? 'mode-norm' : 'mode-const')
       break
     case 'help':
       window.open('help.html', '_blank')
       break
     default:
       if (currentMode == 'mode-unit') {
-        switch(elemt.innerHTML) {
+        switch(elemt.innerHTML.toLowerCase()) {
           case 'list':
             document.getElementById("unitTreeDiv").style.display = 'block'
             document.getElementById("calculator").hidden = true
@@ -1454,20 +1535,19 @@ function keyButton(evnt:Event): void {
         }
       }
       else { // normal/second mode
-        switch(elemt.innerHTML) {
+        switch(elemt.innerHTML.toLowerCase()) {
           case 'π':
             selectConstByName(elemt.innerHTML)
             break
           case '2nd':
-            setButtonMode((currentMode=='mode-2nd') ? "mode-norm" : "mode-2nd")   // any button after this will clear 2-nd mode
+            setButtonMode((currentMode=='mode-2nd') ? 'mode-norm' : 'mode-2nd')   // any button after this will clear 2-nd mode
             break
           case 'list':
             document.getElementById("listDiv").style.display = 'block'
             document.getElementById("calculator").hidden = true
             break
-          case '0': case '1': case '2': case '3':
-          case '4': case '5': case '6': case '7':
-          case '8': case '9': case '.':
+          case '0': case '1': case '2': case '3': case '4': 
+          case '5': case '6': case '7': case '8': case '9': case '.':
             digitButton(elemt.innerHTML)
             break
           case '+': case '-': case '(': case ')': case '=':
@@ -1482,7 +1562,7 @@ function keyButton(evnt:Event): void {
           case '±':
             plusMinusButton()
             break
-          case 'EE':
+          case 'ee':
             eeButton()
             break
           case '¹/ₓ':
@@ -1522,15 +1602,43 @@ function keyButton(evnt:Event): void {
           case 'x³':
             unaryButton('x^3')
             break
-        } // switch for normal only buttons
+          case 'str':
+            finishEntry()
+            top = operands[operands.length-1]
+            memory = top.copy()
+            break
+          case 'rcl':
+            if (entryMode == 'number' || entryMode == 'infix') {
+              operands.push(memory)  
+              setDisplay(operands[operands.length-1].toString())
+            }
+            break
+          case 'sum':
+            finishEntry()
+            top = operands[operands.length-1]
+            if (memory.unitPowers.toString() != top.unitPowers.toString()) {
+              memory.unitPowers = [0,0,0,0,0,0,0]
+              setMessage("Mixed units, converted to scalar")
+            }
+            memory.value += top.value
+            break
+          case 'exch':
+            finishEntry()
+            top = operands[operands.length-1]
+            var temp = top.copy()
+            top = memory
+            memory = temp
+            setDisplay(top.toString())
+            break
+          } // switch for normal only buttons
       } // else for normal only buttons
   } // switch for all buttons
   // after a key press, turn off second mode
   if (elemt.innerHTML != '2nd' && currentMode == 'mode-2nd')
     setButtonMode('mode-norm')
   var nFormulas = exactFormulas.length + implicitFormula.length + missingTermFormulas.length + extraTermFormulas.length
-  boldButton('un1',  (currentMode == 'mode-unit'  && unitSign == -1))  // 1/un button
-  boldButton('nd2',  (currentMode == 'mode-2nd'))                      // 2nd button
+  boldButton('1/un', (currentMode == 'mode-unit'  && unitSign == -1))  // 1/un button
+  boldButton('2nd',  (currentMode == 'mode-2nd'))                      // 2nd button
   boldButton('cnst', (currentMode == 'mode-const'))
   boldButton('unit', (currentMode == 'mode-unit'))
   boldButton('list', (currentMode == 'mode-norm') && nFormulas > 0)
@@ -1630,3 +1738,33 @@ function onResize() {
 }
 window.onresize = onResize
 // TODO, sample code seems to have this, but page doesn't seem loaded at this point so fails, onResize()
+
+
+// 0-9, ., +, -, *, /, =, (, ), E(for EE), M(for +/-), Esc(for CE/C), return(another =)
+document.addEventListener('keydown', handleKeydown);
+function handleKeydown(e) {
+  switch (e.key) {
+    case '0': case '1': case '2': case '3': case '4': 
+    case '5': case '6': case '7': case '8': case '9': case '.':
+      digitButton(e.key)
+      break
+    case '+': case '-': case '*': case '/': case '(': case ')': case '=':
+      infixButton(e.key)
+      break
+    case 'm': case 'M':
+      plusMinusButton()
+      break
+    case 'e': case 'E':
+      eeButton()
+      break
+    case 'Enter':
+      infixButton('=')
+      break
+    case 'Escape': case 'Esc':
+      if (entryMode == 'number' || entryMode == 'infix')
+        clearButton(true)
+      else
+        clearButton(false)
+      break
+  }
+}
