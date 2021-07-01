@@ -225,61 +225,82 @@ const arrayOfFormula = [
 
 const arrayOfButtons = [
   [
-    ["CE/C", "CE/C", "CE/C", "CE/C"],
-    ["π"   , "π"   , "m"   , "π"   ],
-    ["LN"  , "LOG" , "mm"  , "c"   ],
-    ["EE"  , "EE"  , "km"  , "h"   ],
-    ["("   , "("   , "ft"  , "ħ"   ],
-    [")"   , ")"   , "in"  , ""    ],
-    ["÷"   , "÷"   , "mi"  , "ε₀"  ],
-    ["¹/ₓ" , "¹/ₓ" , "1/UN", ""    ]
+    ['CE/C', 'CE/C', 'CE/C', 'CE/C'],
+    ['π'   , 'π'   , 'm'   , 'π'   ],
+    ['LN'  , 'LOG' , 'mm'  , 'c'   ],
+    ['EE'  , 'EE'  , 'km'  , 'h'   ],
+    ['('   , '('   , 'ft'  , 'ħ'   ],
+    [')'   , ')'   , 'in'  , ''    ],
+    ['÷'   , '÷'   , 'mi'  , 'ε₀'  ],
+    ['¹/ₓ' , '¹/ₓ' , '1/UN', ''    ]
   ],[
-    ["MODE", "MODE", "kwn" , ""    ],
-    ["STR" , "SUM" , "kg"  , "µ₀"  ],
-    ["eˣ"  , "10ˣ" , "g"   , "Z₀"  ],
-    ["7"   , "7"   , "mg"  , "e"   ],
-    ["8"   , "8"   , "lb"  , "L"   ],
-    ["9"   , "9"   , "oz"  , "k"   ],
-    ["×"   , "×"   , "gal" , ""    ],
-    ["yˣ"  , "ˣ√y" , "l"   , "R"   ]
+    ['MODE', 'MODE', 'KWN' , ''    ],
+    ['STR' , 'SUM' , 'kg'  , 'µ₀'  ],
+    ['eˣ'  , '10ˣ' , 'g'   , 'Z₀'  ],
+    ['7'   , '7'   , 'mg'  , 'e'   ],
+    ['8'   , '8'   , 'lb'  , 'L'   ],
+    ['9'   , '9'   , 'oz'  , 'k'   ],
+    ['×'   , '×'   , 'gal' , ''    ],
+    ['yˣ'  , 'ˣ√y' , 'l'   , 'R'   ]
   ],[
-    ["2nd" , "2nd" , "unkn", ""    ],
-    ["RCL" , "EXCH", "s"   , ""    ],
-    ["SIN" ,"SIN⁻¹","min"  , ""    ],
-    ["4"   , "4"   , "h"   , ""    ],
-    ["5"   , "5"   , "d"   , ""    ],
-    ["6"   , "6"   , "yr"  , ""    ],
-    ["-"   , "-"   , ""    , ""    ],
-    ["√x"  , "³√x" , ""    , ""    ]
+    ['2nd' , '2nd' , 'UNKN', ''    ],
+    ['RCL' , 'EXCH', 's'   , ''    ],
+    ['SIN' ,'SIN⁻¹','min'  , ''    ],
+    ['4'   , '4'   , 'h'   , ''    ],
+    ['5'   , '5'   , 'd'   , ''    ],
+    ['6'   , '6'   , 'yr'  , ''    ],
+    ['-'   , '-'   , ''    , ''    ],
+    ['√x'  , '³√x' , ''    , ''    ]
   ],[
-    ["CNST", "CNST", ""    , "CNST"],
-    [""    , ""    , "A"   , ""    ],
-    ["COS" ,"COS⁻¹", "V"   , ""    ],
-    ["1"   , "1"   , "Ω"   , ""    ],
-    ["2"   , "2"   , "J"   , ""    ],
-    ["3"   , "3"   , "W"   , ""    ],
-    ["+"   , "+"   , "N"   , ""    ],
-    ["x²"  , "x³"  , "Pa"  , ""    ]
+    ['CNST', 'CNST', ''    , 'CNST'],
+    [''    , ''    , 'A'   , ''    ],
+    ['COS' ,'COS⁻¹', 'V'   , ''    ],
+    ['1'   , '1'   , 'Ω'   , ''    ],
+    ['2'   , '2'   , 'J'   , ''    ],
+    ['3'   , '3'   , 'W'   , ''    ],
+    ['+'   , '+'   , 'N'   , ''    ],
+    ['x²'  , 'x³'  , 'Pa'  , ''    ]
   ],[
-    ["UNIT", "UNIT", "UNIT", ""    ],
-    [""    , ""    , "K"   , "G"   ],
-    ["TAN", "TAN⁻¹", "°C"  , "g₀"  ],
-    ["0"   , "0"   , "°F"  , "M⊙"  ],
-    ["."   , "."   , "cd"  , "M🜨"  ],
-    ["±"   , "±"   , "mol" , "au"  ],
-    ["="   , "="   , "#"   , "R🜨"  ],
-    ["LIST", "LIST", "LIST", "LIST"]
+    ['UNIT', 'UNIT', 'UNIT', ''    ],
+    [''    , ''    , 'K'   , 'G'   ],
+    ['TAN', 'TAN⁻¹', '°C'  , 'g₀'  ],
+    ['0'   , '0'   , '°F'  , 'M⊙'  ],
+    ['.'   , '.'   , 'cd'  , 'M🜨'  ],
+    ['±'   , '±'   , 'mol' , 'au'  ],
+    ['='   , '='   , '#'   , 'R🜨'  ],
+    ['LIST', 'LIST', 'LIST', 'LIST']
   ]
 ]
 
 var buttonElements = new Map( [
-  ['unit', undefined ],
-  ['list', undefined ],
-  ['cnst', undefined ],
+  ['UNIT', undefined ],
+  ['LIST', undefined ],
+  ['CNST', undefined ],
   ['2nd',  undefined ],
-  ['1/un', undefined ],
+  ['1/UN', undefined ]
 ])
 
+const buttonColorKeys = [
+  ['CE/C','MODE','CNST','UNIT','2nd' ,'LIST','1/UN','#'],
+  ['.'   ,'±'   ,'0'   ,'1'   ,'2'   ,'3'   ,'4'   ,'5'   ,'6'   ,'7'   ,'8'   ,'9'   ,'EE'],
+  ['+'   ,'-'   ,'×'   ,'÷'   ,'='   ,'('   ,')'],
+  ['π'   ,'STR' ,'RCL' ,'SIN' ,'COS' ,'TAN' ,'LN'  ,'eˣ'  ,'yˣ' ,'¹/ₓ'  ,'√x'  ,'x²', 'LOG', 
+  ,'SUM' ,'EXCH','10ˣ' ,'ˣ√y' , '³√x', 'x³' ,'SIN⁻¹','COS⁻¹','TAN⁻¹']
+]
+
+// input: h in [0,360] and s, l in [0,1]
+function hsl(h:number, s:number, l:number) : string
+{
+  var a = s * Math.min(l, 1 - l)
+  function f(n) {
+    var k = (n + h / 30) % 12
+    var color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+    return ('0' + Math.round(255 * color).toString(16)).slice(-2)   // right 2 characters
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}   
+
+const buttonColors = [hsl(30,1,.2), hsl(210,1,.2), hsl(75,1,.2), hsl(270,1,.2), hsl(165,1,.2), hsl(330,1,.2)]
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -288,7 +309,7 @@ function format(n:number) : string {
   if (/^-?0.0?0?[1-9]/.test(p))   // allow up to 0.00 and still show decimal
     p = p.substr(0,10)
   if (p.includes('.') && !p.includes('e')) {
-    p = p.replace(/0+$/, "")      // get rid of trailing 0's after decimal point
+    p = p.replace(/0+$/, '')      // get rid of trailing 0's after decimal point
     if (p.substr(p.length-1) == '.')
       p = p.substr(0, p.length-1) // get rid of trailing decimal point
   }
@@ -659,7 +680,7 @@ class Formulas {
     java = java.replace(/atan/g,  'Math.atan')
     java = java.replace(/sqrt/g,  'Math.sqrt')
     java = java.replace(/cbrt/g,  'Math.cbrt')
-    var str = '"use strict"; '
+    var str = "'use strict'; "
     for (var i=0; i<listOfConstants.length; i++)
       str += 'var $' + listOfConstants[i].altName + ' = ' + listOfConstants[i].value + '; '
     str += 'function root4(x) { return x**(1/4) } '
@@ -856,7 +877,7 @@ window.onload = function () {
   setupScroll()
 }
 
-var landscapeMediaQuery = window.matchMedia("only screen and (orientation: landscape)")
+var landscapeMediaQuery = window.matchMedia('only screen and (orientation: landscape)')
 landscapeMediaQuery.addEventListener('change', function() { setButtonMode(currentMode) })
 
 function setButtonMode(newMode:string) {
@@ -866,27 +887,80 @@ function setButtonMode(newMode:string) {
   for (var [key] of buttonElements)
     buttonElements.set(key, undefined)
 
+  var groups = []
+  for (k=0; k<listOfConstants.length; k++)
+    if (!(groups.includes(listOfConstants[k].group)))
+      groups.push(listOfConstants[k].group)
+
   for (var i=0; i<5; i++)
     for (var j=0; j<8; j++) {
       var button : HTMLElement
-      if (landscapeMediaQuery.matches) // horizontal button arrangment (8 wide, 5 high)
-        button = document.getElementById('x'+j.toString()+'y'+i.toString())
-      else {                        // vertical button arrangment (8 high, 5 wide)
+      if (landscapeMediaQuery.matches)  // horizontal button arrangment (8 wide, 5 high)
+        button = document.getElementById('x'+j.toString() + 'y'+i.toString())
+      else {                            // vertical button arrangment (8 high, 5 wide)
         if ((newMode == 'mode-norm' || newMode == 'mode-2nd') && j >= 3)
-          button = document.getElementById('x'+(j-3).toString()+'y'+(i+3).toString())   // show number pad as in horizontal
+          button = document.getElementById('x'+(j-3).toString() + 'y'+(i+3).toString())   // show number pad as in horizontal
         else
-          button = document.getElementById('x'+i.toString()+'y'+j.toString())       // exchange rows for columns
+          button = document.getElementById('x'+i.toString() + 'y'+j.toString())           // exchange rows for columns
       }
       button.innerHTML = arrayOfButtons[i][j][mInx]
+      // color buttons
+      if (newMode == 'mode-norm' || newMode == 'mode-2nd') {
+        for (var k=0; k<buttonColorKeys.length; k++)
+          if (buttonColorKeys[k].includes(button.innerHTML)) {
+            button.style.backgroundColor = buttonColors[k]
+            break
+          }
+          if (k == buttonColorKeys.length)
+            button.style.backgroundColor = buttonColors[0]  // button not found
+      }
+      else if (newMode == 'mode-unit') {
+        var unit = findUnitByName(button.innerHTML)
+        if (buttonColorKeys[0].includes(button.innerHTML)) 
+          button.style.backgroundColor = buttonColors[0]
+        else if (unit) {
+          if (unit.units.isEqual(new ShortUnits('m')))
+            button.style.backgroundColor = buttonColors[1]
+          else if (unit.units.isEqual(new ShortUnits('kg')))
+            button.style.backgroundColor = buttonColors[2]
+          else if (unit.units.isEqual(new ShortUnits('s')))
+            button.style.backgroundColor = buttonColors[3]
+          else if (unit.units.isEqual(new ShortUnits('K')) || unit.units.isEqual(new ShortUnits('A')) || unit.units.isEqual(new ShortUnits('mol')) || unit.units.isEqual(new ShortUnits('cd')))
+            button.style.backgroundColor = buttonColors[4]
+          else
+            button.style.backgroundColor = buttonColors[5]
+        }
+        else 
+          button.style.backgroundColor = buttonColors[0]
+      }
+      else if (newMode == 'mode-const') {
+        var cnst = findConstantByName(button.innerHTML)
+        if (buttonColorKeys[0].includes(button.innerHTML)) 
+          button.style.backgroundColor = buttonColors[0]
+        else if (cnst) {
+          var inx = groups.indexOf(cnst.group)
+          if (inx >= 4)
+            button.style.backgroundColor = buttonColors[5]
+          else if (inx < 0)
+            button.style.backgroundColor = buttonColors[0]
+          else
+            button.style.backgroundColor = buttonColors[inx+1] 
+        }
+        else
+          button.style.backgroundColor = buttonColors[0]
+      }
       // save special buttons for later reference
-      if (buttonElements.has(button.innerHTML.toLowerCase()))
-        buttonElements.set(button.innerHTML.toLowerCase(), button)
+      if (buttonElements.has(button.innerHTML))
+        buttonElements.set(button.innerHTML, button)
     }  
 
   currentMode = newMode
-  boldButton('cnst', false)
-  boldButton('unit', false)
-  boldButton('list', false)
+  var nFormulas = exactFormulas.length + implicitFormula.length + missingTermFormulas.length + extraTermFormulas.length
+  boldButton('1/UN', (currentMode == 'mode-unit'  && unitSign == -1))  // 1/un button
+  boldButton('2nd',  (currentMode == 'mode-2nd'))                      // 2nd button
+  boldButton('CNST', (currentMode == 'mode-const'))
+  boldButton('UNIT', (currentMode == 'mode-unit'))
+  boldButton('LIST', (currentMode == 'mode-norm') && nFormulas > 0)
 }
 
 
@@ -901,24 +975,24 @@ function fillTreeInHTML(listForTree:any[], treeView:string, funcName:string) {
   var str = ''
   for (i=0; i<groups.length; i++) {
     var symName = treeView + '-' + groups[i]
-    str += `<li> <span class="caret">${groups[i]}</span><ul id="${symName}" class="nested"> </ul> </li>`
+    str += `<li> <span class='caret'>${groups[i]}</span><ul id='${symName}' class='nested'> </ul> </li>`
   }
   document.getElementById(treeView).innerHTML = str
 
   for (var i=0; i<listForTree.length; i++) {
     var unit = listForTree[i]
-    var li = `<li onclick="${funcName}('${unit.name}',true)">${unit.desc} (${unit.name})</li>`
+    var li = `<li onclick='${funcName}('${unit.name}',true)'>${unit.desc} (${unit.name})</li>`
     document.getElementById(treeView + '-' + unit.group).innerHTML += li
   }
 }
 
 
 function wireUpTreeTogglerInHTML() {
-  var toggler = document.getElementsByClassName("caret")
+  var toggler = document.getElementsByClassName('caret')
   for (var i = 0; i < toggler.length; i++) {
-    toggler[i].addEventListener("click", function() {
-      this.parentElement.querySelector(".nested").classList.toggle("active")
-      this.classList.toggle("caret-down")
+    toggler[i].addEventListener('click', function() {
+      this.parentElement.querySelector('.nested').classList.toggle('active')
+      this.classList.toggle('caret-down')
     })
   }
 }
@@ -927,31 +1001,31 @@ function wireUpTreeTogglerInHTML() {
 // TODO - remove (also HTML for this)
 function debug() {
   var i : number
-  document.getElementById("operators").innerHTML = "---operators---"
+  document.getElementById('operators').innerHTML = '---operators---'
   for (i=0; i<operators.length; i++)
-    document.getElementById("operators").innerHTML += "<br>" + operators[i]
-  document.getElementById("operands").innerHTML = "----operands----"
+    document.getElementById('operators').innerHTML += '<br>' + operators[i]
+  document.getElementById('operands').innerHTML = '----operands----'
   for (i=0; i<operands.length; i++)
-    document.getElementById("operands").innerHTML += "<br>" + JSON.stringify(operands[i])
-  document.getElementById("entryMode").innerHTML = "----entryMode----<BR>" + entryMode
+    document.getElementById('operands').innerHTML += '<br>' + JSON.stringify(operands[i])
+  document.getElementById('entryMode').innerHTML = '----entryMode----<BR>' + entryMode
 }
 
 
 // setMessage called onclick in HTML
 function setMessage(message?:string) {
   if (message == undefined)
-    message = "Physical Calculator"
-  document.getElementById("message").innerHTML = message
+    message = 'Physical Calculator'
+  document.getElementById('message').innerHTML = message
 }
 
 
 function setDisplay(display:string) {
-  document.getElementById("display").innerHTML = display
+  document.getElementById('display').innerHTML = display
 }
 
 
 function getDisplay() : string {
-  return document.getElementById("display").innerHTML
+  return document.getElementById('display').innerHTML
 }
 
 
@@ -959,14 +1033,14 @@ function updateDisplay() {
   if (exponent == '')
     setDisplay(mantisa)
   else
-    setDisplay(mantisa + "E" + exponent)
+    setDisplay(mantisa + 'E' + exponent)
 }
 
 
 function digitButton(symbol : string) {
   if (entryMode == 'number')
     operands.pop()
-  if (entryMode == "exponent") {
+  if (entryMode == 'exponent') {
     if (exponent == '0')
         exponent = symbol
     else
@@ -977,7 +1051,7 @@ function digitButton(symbol : string) {
         mantisa = symbol
     else
       mantisa += symbol
-    entryMode = "mantisa"
+    entryMode = 'mantisa'
   }
   updateDisplay()
 }
@@ -996,14 +1070,14 @@ function eeButton() {
   else {
     if (exponent == '')
       exponent = '0'
-    entryMode = "exponent"
+    entryMode = 'exponent'
     updateDisplay()
   }
 }
 
 
 function plusMinusButton() {
-  if (entryMode == "exponent") {
+  if (entryMode == 'exponent') {
     if (exponent.slice(0,1) == '-')
       exponent = exponent.slice(1)
     else {
@@ -1065,14 +1139,14 @@ function evaluateTopOperator() : Measurement {
       ret.value = x.value + y.value
       if (x.unitPowers.toString() != y.unitPowers.toString()) {
         ret.unitPowers = [0,0,0,0,0,0,0]
-        setMessage("Mixed units, converted to scalar")
+        setMessage('Mixed units, converted to scalar')
       }
       break
     case '-':
       ret.value = x.value - y.value
       if (x.unitPowers.toString() != y.unitPowers.toString()) {
         ret.unitPowers = [0,0,0,0,0,0,0]
-        setMessage("Mixed units, converted to scalar")
+        setMessage('Mixed units, converted to scalar')
       }
       break
     case '*':
@@ -1098,7 +1172,7 @@ function evaluateTopOperator() : Measurement {
       if (y.unitPowers.toString() == [0,0,0,0,0,0,0].toString())
         powMeasurement(ret, y.value)
       else
-        setMessage("Power must be scalar")
+        setMessage('Power must be scalar')
       break
   }
   return ret
@@ -1184,9 +1258,9 @@ function selectUnitByName(name:string, tree:boolean=false)  {
     top.unitNames = unit.names()
   }
   else { // else simple unit
-    if (top.unitPowers[unit.index()] == 0 || (top.unitNames[unit.index()] == unit.name && top.complexUnits == ""))  // if scalar or changing current unit powers, scale value to SI units
+    if (top.unitPowers[unit.index()] == 0 || (top.unitNames[unit.index()] == unit.name && top.complexUnits == ''))  // if scalar or changing current unit powers, scale value to SI units
       top.value *= unit.factor ** unitSign * unit.units.powers[unit.index()]
-    if (top.unitNames[unit.index()] == unit.name && top.complexUnits == "")
+    if (top.unitNames[unit.index()] == unit.name && top.complexUnits == '')
       top.unitPowers[unit.index()] += unitSign * unit.units.powers[unit.index()]
     else if (top.unitPowers[unit.index()] == 0)
       top.unitPowers[unit.index()] = unitSign * unit.units.powers[unit.index()]
@@ -1198,28 +1272,29 @@ function selectUnitByName(name:string, tree:boolean=false)  {
   top.complexUnits = (unit.isComplex() ? unit.name : '')
 
   setDisplay(operands[operands.length-1].toString())
-  document.getElementById("unitTreeDiv").style.display = 'none'
-  document.getElementById("calculator").hidden = false
+  document.getElementById('unitTreeDiv').style.display = 'none'
+  document.getElementById('calculator').hidden = false
 
   if (tree)
     setButtonMode('mode-norm')
 }
 
 
-function selectConstByName(button:string, tree:boolean=false) {
-  function findConstantByName(name:string) {
-      for (var i=0; i<listOfConstants.length; i++)
-        if (name == listOfConstants[i].name)
-          return listOfConstants[i]
-      return undefined
-  }
+function findConstantByName(name:string) {
+  for (var i=0; i<listOfConstants.length; i++)
+    if (name == listOfConstants[i].name)
+      return listOfConstants[i]
+  return undefined
+}
 
+
+function selectConstByName(button:string, tree:boolean=false) {
   if (entryMode == 'number')
     operands.pop()
   operands.push(findConstantByName(button).toMeasure())
   setDisplay(operands[operands.length-1].toString())
-  document.getElementById("constTreeDiv").style.display = 'none'
-  document.getElementById("calculator").hidden = false
+  document.getElementById('constTreeDiv').style.display = 'none'
+  document.getElementById('calculator').hidden = false
 
   if (tree)
     setButtonMode('mode-norm')
@@ -1233,7 +1308,7 @@ function powMeasurement(top:Measurement, power:number) {
     top.unitPowers[i] *= power
     if (!Number.isInteger(top.unitPowers[i])) {
       top.unitPowers = undo
-      setMessage("Fractional unit powers not allowed")
+      setMessage('Fractional unit powers not allowed')
       return
     }
   }
@@ -1243,7 +1318,7 @@ function powMeasurement(top:Measurement, power:number) {
 
 function transcendentalOp(top:Measurement, newValue:number) {
   if (top.nPowers() != 0) {
-    setMessage("Transcendental functions require scalar")
+    setMessage('Transcendental functions require scalar')
     return
   }
   top.value = newValue
@@ -1449,7 +1524,7 @@ function toggleUnitMode() {
   if (currentMode == 'mode-unit')
     setButtonMode('mode-norm')
   else
-    setButtonMode("mode-unit")
+    setButtonMode('mode-unit')
   unitSign = 1
   finishEntry()
   setDisplay(operands[operands.length-1].toString())
@@ -1467,7 +1542,11 @@ function keyButton(evnt:Event): void {
 
 	if (!evnt)
     evnt = window.event
-  var elemt = (evnt.target || evnt.srcElement) as Element
+  var elemt = (evnt.target || evnt.srcElement) as HTMLElement
+  elemt.style.borderStyle = 'inset'
+  var closure = function() { elemt.style.borderStyle = 'outset' }
+  setTimeout(closure, 200)
+
   var top = operands[operands.length-1]
 
   switch(elemt.innerHTML.toLowerCase()) {
@@ -1506,8 +1585,8 @@ function keyButton(evnt:Event): void {
       if (currentMode == 'mode-unit') {
         switch(elemt.innerHTML.toLowerCase()) {
           case 'list':
-            document.getElementById("unitTreeDiv").style.display = 'block'
-            document.getElementById("calculator").hidden = true
+            document.getElementById('unitTreeDiv').style.display = 'block'
+            document.getElementById('calculator').hidden = true
             break
           case '1/un':
             unitSign = -unitSign
@@ -1525,9 +1604,9 @@ function keyButton(evnt:Event): void {
         } // switch unit buttons
       } // if unit button mode
       else if (currentMode == 'mode-const') {
-        if (elemt.innerHTML == 'list') {
-          document.getElementById("constTreeDiv").style.display = 'block'
-          document.getElementById("calculator").hidden = true
+        if (elemt.innerHTML.toLowerCase() == 'list') {
+          document.getElementById('constTreeDiv').style.display = 'block'
+          document.getElementById('calculator').hidden = true
         }
         else {
           selectConstByName(elemt.innerHTML)
@@ -1543,8 +1622,8 @@ function keyButton(evnt:Event): void {
             setButtonMode((currentMode=='mode-2nd') ? 'mode-norm' : 'mode-2nd')   // any button after this will clear 2-nd mode
             break
           case 'list':
-            document.getElementById("listDiv").style.display = 'block'
-            document.getElementById("calculator").hidden = true
+            document.getElementById('listDiv').style.display = 'block'
+            document.getElementById('calculator').hidden = true
             break
           case '0': case '1': case '2': case '3': case '4': 
           case '5': case '6': case '7': case '8': case '9': case '.':
@@ -1618,7 +1697,7 @@ function keyButton(evnt:Event): void {
             top = operands[operands.length-1]
             if (memory.unitPowers.toString() != top.unitPowers.toString()) {
               memory.unitPowers = [0,0,0,0,0,0,0]
-              setMessage("Mixed units, converted to scalar")
+              setMessage('Mixed units, converted to scalar')
             }
             memory.value += top.value
             break
@@ -1636,12 +1715,6 @@ function keyButton(evnt:Event): void {
   // after a key press, turn off second mode
   if (elemt.innerHTML != '2nd' && currentMode == 'mode-2nd')
     setButtonMode('mode-norm')
-  var nFormulas = exactFormulas.length + implicitFormula.length + missingTermFormulas.length + extraTermFormulas.length
-  boldButton('1/un', (currentMode == 'mode-unit'  && unitSign == -1))  // 1/un button
-  boldButton('2nd',  (currentMode == 'mode-2nd'))                      // 2nd button
-  boldButton('cnst', (currentMode == 'mode-const'))
-  boldButton('unit', (currentMode == 'mode-unit'))
-  boldButton('list', (currentMode == 'mode-norm') && nFormulas > 0)
   // TODO debug()
 } // function keyButton
 
