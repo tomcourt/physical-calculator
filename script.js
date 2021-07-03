@@ -948,18 +948,16 @@ function evaluateTopOperator() {
     var oper = operators.pop();
     switch (oper) {
         case '+':
-            ret.value = x.value + y.value;
-            if (x.unitPowers.toString() != y.unitPowers.toString()) {
-                ret.unitPowers = [0, 0, 0, 0, 0, 0, 0];
-                setMessage('Mixed units, converted to scalar');
-            }
+            if (x.unitPowers.toString() != y.unitPowers.toString())
+                setMessage("Can't add, units differ!");
+            else
+                ret.value = x.value + y.value;
             break;
         case '-':
-            ret.value = x.value - y.value;
-            if (x.unitPowers.toString() != y.unitPowers.toString()) {
-                ret.unitPowers = [0, 0, 0, 0, 0, 0, 0];
-                setMessage('Mixed units, converted to scalar');
-            }
+            if (x.unitPowers.toString() != y.unitPowers.toString())
+                setMessage("Can't subtract, units differ!");
+            else
+                ret.value = x.value - y.value;
             break;
         case '*':
             ret.value = x.value * y.value;
@@ -983,7 +981,7 @@ function evaluateTopOperator() {
             if (y.unitPowers.toString() == [0, 0, 0, 0, 0, 0, 0].toString())
                 powMeasurement(ret, y.value);
             else
-                setMessage('Power must be scalar');
+                setMessage('Power must be scalar!');
             break;
     }
     return ret;
@@ -1050,7 +1048,7 @@ function selectUnitByName(name, tree = false) {
     if (unit) {
         if (unit.isComplex() || unit.isComposite()) {
             if (top.unitPowers.toString() != [0, 0, 0, 0, 0, 0, 0].toString() && top.unitPowers.toString() != unit.units.powers.toString())
-                setMessage('Units differs');
+                setMessage("Units differ, can't convert!");
             else {
                 if (top.unitPowers.toString() == [0, 0, 0, 0, 0, 0, 0].toString()) {
                     top.value -= unit.offset;
@@ -1109,7 +1107,7 @@ function powMeasurement(top, power) {
         top.unitPowers[i] *= power;
         if (!Number.isInteger(top.unitPowers[i])) {
             top.unitPowers = undo;
-            setMessage('Fractional unit powers not allowed');
+            setMessage('Fractional unit powers not allowed!');
             return;
         }
     }
@@ -1117,7 +1115,7 @@ function powMeasurement(top, power) {
 }
 function transcendentalOp(top, newValue) {
     if (top.nPowers() != 0) {
-        setMessage('Transcendental functions require scalar');
+        setMessage('Transcendental functions require scalar!');
         return;
     }
     top.value = newValue;
@@ -1481,11 +1479,10 @@ function keyButton(evnt) {
                     case 'sum':
                         finishEntry();
                         top = operands[operands.length - 1];
-                        if (memory.unitPowers.toString() != top.unitPowers.toString()) {
-                            memory.unitPowers = [0, 0, 0, 0, 0, 0, 0];
-                            setMessage('Mixed units, converted to scalar');
-                        }
-                        memory.value += top.value;
+                        if (memory.unitPowers.toString() != top.unitPowers.toString())
+                            setMessage("Can't sum, units differ");
+                        else
+                            memory.value += top.value;
                         break;
                     case 'exch':
                         finishEntry();
@@ -1501,12 +1498,11 @@ function keyButton(evnt) {
     if (elemt.innerHTML != '2nd' && currentMode == 'mode-2nd')
         setButtonMode('mode-norm');
     elemt.style.borderStyle = 'inset';
-    var bgc = elemt.style.backgroundColor;
     elemt.style.opacity = '.5';
     var closure = function () { elemt.style.borderStyle = 'outset'; elemt.style.opacity = '1'; };
     setTimeout(closure, 200);
 }
-function cancelButton(tree) {
+function cancelButton() {
     document.getElementById('constTreeDiv').style.display = 'none';
     document.getElementById('unitTreeDiv').style.display = 'none';
     document.getElementById('listDiv').style.display = 'none';
