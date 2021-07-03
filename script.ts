@@ -281,7 +281,7 @@ var buttonElements = new Map( [
 ])
 
 const buttonColorKeys = [
-  ['CE/C','MODE','CNST','UNIT','2nd' ,'LIST','1/UN','#'],
+  ['CE/C','MODE','CNST','UNIT','2nd' ,'LIST','KWN' ,'UNKN','1/UN','#'],
   ['.'   ,'±'   ,'0'   ,'1'   ,'2'   ,'3'   ,'4'   ,'5'   ,'6'   ,'7'   ,'8'   ,'9'   ,'EE'],
   ['+'   ,'-'   ,'×'   ,'÷'   ,'='   ,'('   ,')'],
   ['π'   ,'STR' ,'RCL' ,'SIN' ,'COS' ,'TAN' ,'LN'  ,'eˣ'  ,'yˣ' ,'¹/ₓ'  ,'√x'  ,'x²', 'LOG', 
@@ -300,7 +300,7 @@ function hsl(h:number, s:number, l:number) : string
   return `#${f(0)}${f(8)}${f(4)}`;
 }   
 
-const buttonColors = [hsl(30,1,.2), hsl(210,1,.2), hsl(75,1,.2), hsl(270,1,.2), hsl(165,1,.2), hsl(330,1,.2)]
+const buttonColors = [hsl(30,1,.2), hsl(210,1,.2), hsl(75,1,.2), hsl(270,1,.2), hsl(165,1,.2), hsl(330,1,.2), hsl(0,0,.5)]
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -912,7 +912,7 @@ function setButtonMode(newMode:string) {
             break
           }
           if (k == buttonColorKeys.length)
-            button.style.backgroundColor = buttonColors[0]  // button not found
+            button.style.backgroundColor = buttonColors[6]  // button not found
       }
       else if (newMode == 'mode-unit') {
         var unit = findUnitByName(button.innerHTML)
@@ -931,7 +931,7 @@ function setButtonMode(newMode:string) {
             button.style.backgroundColor = buttonColors[5]
         }
         else 
-          button.style.backgroundColor = buttonColors[0]
+          button.style.backgroundColor = buttonColors[6]
       }
       else if (newMode == 'mode-const') {
         var cnst = findConstantByName(button.innerHTML)
@@ -942,12 +942,12 @@ function setButtonMode(newMode:string) {
           if (inx >= 4)
             button.style.backgroundColor = buttonColors[5]
           else if (inx < 0)
-            button.style.backgroundColor = buttonColors[0]
+            button.style.backgroundColor = buttonColors[6]
           else
             button.style.backgroundColor = buttonColors[inx+1] 
         }
         else
-          button.style.backgroundColor = buttonColors[0]
+          button.style.backgroundColor = buttonColors[6]
       }
       // save special buttons for later reference
       if (buttonElements.has(button.innerHTML))
@@ -981,7 +981,7 @@ function fillTreeInHTML(listForTree:any[], treeView:string, funcName:string) {
 
   for (var i=0; i<listForTree.length; i++) {
     var unit = listForTree[i]
-    var li = `<li onclick='${funcName}('${unit.name}',true)'>${unit.desc} (${unit.name})</li>`
+    var li = `<li onclick="${funcName}('${unit.name}',true)">${unit.desc} (${unit.name})</li>`
     document.getElementById(treeView + '-' + unit.group).innerHTML += li
   }
 }
@@ -1245,38 +1245,42 @@ function selectUnitByName(name:string, tree:boolean=false)  {
   var unit = findUnitByName(name)
   var top = operands[operands.length-1]
 
-  if (unit.isComplex() || unit.isComposite()) {
-    if (top.unitPowers.toString() == [0,0,0,0,0,0,0].toString()) {
-      top.value -= unit.offset
-      top.value *= unit.factor ** unitSign      // convert scalar to SI units internally
+  if (unit) {
+    if (unit.isComplex() || unit.isComposite()) {
+      if (top.unitPowers.toString() != [0,0,0,0,0,0,0].toString() && top.unitPowers.toString() != unit.units.powers.toString())        
+        setMessage('Units differs')
+      else {
+        if (top.unitPowers.toString() == [0,0,0,0,0,0,0].toString()) {
+          top.value -= unit.offset
+          top.value *= unit.factor ** unitSign      // convert scalar to SI units internally
+        }
+        // updated factor will change value shown of complex unit
+        top.unitPowers = unit.units.powers.slice()
+        top.unitNames = unit.names()
+      }
     }
-    else if (top.unitPowers.toString() != unit.units.powers.toString()) {
-      setMessage('Units differs')
-      return
-    } // else updated factor will change value shown of complex unit
-    top.unitPowers = unit.units.powers.slice()
-    top.unitNames = unit.names()
+    else { // else simple unit
+      if (top.unitPowers[unit.index()] == 0 || (top.unitNames[unit.index()] == unit.name && top.complexUnits == ''))  // if scalar or changing current unit powers, scale value to SI units
+        top.value *= unit.factor ** unitSign * unit.units.powers[unit.index()]
+      if (top.unitNames[unit.index()] == unit.name && top.complexUnits == '')
+        top.unitPowers[unit.index()] += unitSign * unit.units.powers[unit.index()]
+      else if (top.unitPowers[unit.index()] == 0)
+        top.unitPowers[unit.index()] = unitSign * unit.units.powers[unit.index()]
+      if (top.unitPowers[unit.index()] == 0)
+        top.unitNames[unit.index()] = ''
+      else
+        top.unitNames[unit.index()] = unit.names()[unit.index()]
+    }
+    top.complexUnits = (unit.isComplex() ? unit.name : '')
+    setDisplay(top.toString())
   }
-  else { // else simple unit
-    if (top.unitPowers[unit.index()] == 0 || (top.unitNames[unit.index()] == unit.name && top.complexUnits == ''))  // if scalar or changing current unit powers, scale value to SI units
-      top.value *= unit.factor ** unitSign * unit.units.powers[unit.index()]
-    if (top.unitNames[unit.index()] == unit.name && top.complexUnits == '')
-      top.unitPowers[unit.index()] += unitSign * unit.units.powers[unit.index()]
-    else if (top.unitPowers[unit.index()] == 0)
-      top.unitPowers[unit.index()] = unitSign * unit.units.powers[unit.index()]
-    if (top.unitPowers[unit.index()] == 0)
-      top.unitNames[unit.index()] = ''
-    else
-      top.unitNames[unit.index()] = unit.names()[unit.index()]
-  }
-  top.complexUnits = (unit.isComplex() ? unit.name : '')
 
-  setDisplay(operands[operands.length-1].toString())
-  document.getElementById('unitTreeDiv').style.display = 'none'
-  document.getElementById('calculator').hidden = false
-
-  if (tree)
+  if (tree) {
+    document.getElementById('unitTreeDiv').style.display = 'none'
+    document.getElementById('calculator').hidden = false
+    document.getElementById('help').hidden = false
     setButtonMode('mode-norm')
+  }
 }
 
 
@@ -1291,13 +1295,18 @@ function findConstantByName(name:string) {
 function selectConstByName(button:string, tree:boolean=false) {
   if (entryMode == 'number')
     operands.pop()
-  operands.push(findConstantByName(button).toMeasure())
-  setDisplay(operands[operands.length-1].toString())
-  document.getElementById('constTreeDiv').style.display = 'none'
-  document.getElementById('calculator').hidden = false
+  var cnst = findConstantByName(button)
+  if (cnst) {
+    operands.push(cnst.toMeasure())
+    setDisplay(operands[operands.length-1].toString())
+  }
 
-  if (tree)
+  if (tree) {
+    document.getElementById('constTreeDiv').style.display = 'none'
+    document.getElementById('calculator').hidden = false
+    document.getElementById('help').hidden = false
     setButtonMode('mode-norm')
+  }
 }
 
 
@@ -1543,9 +1552,6 @@ function keyButton(evnt:Event): void {
 	if (!evnt)
     evnt = window.event
   var elemt = (evnt.target || evnt.srcElement) as HTMLElement
-  elemt.style.borderStyle = 'inset'
-  var closure = function() { elemt.style.borderStyle = 'outset' }
-  setTimeout(closure, 200)
 
   var top = operands[operands.length-1]
 
@@ -1587,6 +1593,7 @@ function keyButton(evnt:Event): void {
           case 'list':
             document.getElementById('unitTreeDiv').style.display = 'block'
             document.getElementById('calculator').hidden = true
+            document.getElementById('help').hidden = true
             break
           case '1/un':
             unitSign = -unitSign
@@ -1607,6 +1614,7 @@ function keyButton(evnt:Event): void {
         if (elemt.innerHTML.toLowerCase() == 'list') {
           document.getElementById('constTreeDiv').style.display = 'block'
           document.getElementById('calculator').hidden = true
+          document.getElementById('help').hidden = true
         }
         else {
           selectConstByName(elemt.innerHTML)
@@ -1624,6 +1632,7 @@ function keyButton(evnt:Event): void {
           case 'list':
             document.getElementById('listDiv').style.display = 'block'
             document.getElementById('calculator').hidden = true
+            document.getElementById('help').hidden = true
             break
           case '0': case '1': case '2': case '3': case '4': 
           case '5': case '6': case '7': case '8': case '9': case '.':
@@ -1715,16 +1724,20 @@ function keyButton(evnt:Event): void {
   // after a key press, turn off second mode
   if (elemt.innerHTML != '2nd' && currentMode == 'mode-2nd')
     setButtonMode('mode-norm')
+
+  elemt.style.borderStyle = 'inset'
+  elemt.style.opacity = '.5'
+  var closure = function() { elemt.style.borderStyle = 'outset'; elemt.style.opacity = '1' } 
+  setTimeout(closure, 200)
+ 
   // TODO debug()
 } // function keyButton
 
-function cancelTreeButton(tree:string) {
-  document.getElementById(tree + 'TreeDiv').style.display = 'none'
-  document.getElementById('calculator').hidden = false
-}
-
-function cancelListButton() {
+function cancelButton() {
+  document.getElementById('constTreeDiv').style.display = 'none'
+  document.getElementById('unitTreeDiv').style.display = 'none'
   document.getElementById('listDiv').style.display = 'none'
+  document.getElementById('help').hidden = false
   document.getElementById('calculator').hidden = false
 }
 
