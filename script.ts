@@ -719,66 +719,65 @@ class Formulas {
 
 var listOfFormulas:Formulas[] = []
 
-function findExactFormulas() : Formulas[] {
-  var grouping : string[]
+function findMatchingFormulas(type:string) : Formulas[] {
+  var sortGrouping : string[]
   var found = []
 
-  function swap(f:Formulas, i:number, j:number) {
+  function swapFormulaVars(f:Formulas, i:number, j:number) {
     var n = f.varNames[i]
     f.varNames[i] = f.varNames[j]
     f.varNames[j] = n
     var t = f.varUnits[i].copy()
     f.varUnits[i] = f.varUnits[j].copy()
     f.varUnits[j] = t
-    var g = grouping[i]
-    grouping[i] = grouping[j]
-    grouping[j] = g
+    var g = sortGrouping[i]
+    sortGrouping[i] = sortGrouping[j]
+    sortGrouping[j] = g
   }
 
-  // heap's algorithm to permutate elements from first to end of var's, but only if same unit types
-  function permutateVarsAndAddToFound(formula:Formulas, first:number, k:number) {
-    if (k == first+1)
+  // rearrange variables when formula has repeated variables with identical units using heap's algorithm
+  // (resursively permutate variables from first to end, but only if same unit types)
+  function permutateVarsAndAddToFound(formula:Formulas, first:number, last:number) {
+    if (last == first+1)
       found.push(formula.copy())
     else {
-      permutateVarsAndAddToFound(formula.copy(), first, k-1)
-      for (var i=first; i<k-1; i++) {
-        if (((k-first)&1) == 0) {             // is even test
-          if (grouping[i] == grouping[k-1]) {  // only swap if same units
-            swap(formula, i, k-1)
-            permutateVarsAndAddToFound(formula.copy(), first, k-1)
+      permutateVarsAndAddToFound(formula.copy(), first, last-1)
+      for (var i=first; i<last-1; i++) {
+        if (((last-first)&1) == 0) {             // is even test
+          if (sortGrouping[i] == sortGrouping[last-1]) {  // only swap if same units
+            swapFormulaVars(formula, i, last-1)
+            permutateVarsAndAddToFound(formula.copy(), first, last-1)
           }
         }
         else {
-          if (grouping[first] == grouping[k-1]) {  // only swap if same units
-            swap(formula, first, k-1)
-            permutateVarsAndAddToFound(formula.copy(), first, k-1)
+          if (sortGrouping[first] == sortGrouping[last-1]) {  // only swap if same units
+            swapFormulaVars(formula, first, last-1)
+            permutateVarsAndAddToFound(formula.copy(), first, last-1)
           }
         }
       }
     }
   }
 
-  // sort varNames and varUnits so matching units appear at end, returns inx of first var's
+  // sort variables so those with matching units appear at end, returns inx of first matching var's
   function sortRepeatedVarsToEnd(formula:Formulas, exclude:string) : number {
     // note all the repeated solutions (except for the unknown variable(excluded)
-    grouping = []
-    for (var i=0; i<formula.varUnits.length; i++)
-      grouping.push('')
+    sortGrouping = (new Array(formula.varUnits.length)).fill('') // short unit strings, i.e. 'm/s2'
     for (var i=0; i<formula.varUnits.length; i++)
       for (var j=i+1; j<formula.varUnits.length; j++)
-        if (formula.varUnits[i].isEqual(formula.varUnits[j]) &&
-        formula.varNames[i] != exclude && formula.varNames[j] != exclude) {
-          grouping[i] = formula.varUnits[i].toString()
-          grouping[j] = formula.varUnits[i].toString()
+        // variables units match and neither is excluded unknown
+        if (formula.varUnits[i].isEqual(formula.varUnits[j]) && formula.varNames[i] != exclude && formula.varNames[j] != exclude) {
+          sortGrouping[i] = formula.varUnits[i].toString()
+          sortGrouping[j] = formula.varUnits[i].toString()
         }
-    // bubble sort the solutions so repeated are at end
+    // bubble sort the solutions by short units (grouping) so repeated are at end and grouped logically
     var n = formula.varUnits.length
     var didSwap : boolean
     do {
       didSwap = false
       for (i=1; i<n; i++) {
-        if (grouping[i-1] > grouping[i]) {
-          swap(formula, i-1, i)
+        if (sortGrouping[i-1] > sortGrouping[i]) {
+          swapFormulaVars(formula, i-1, i)
           didSwap = true
         }
       }
@@ -786,7 +785,7 @@ function findExactFormulas() : Formulas[] {
     } while (didSwap)
     // find first of the repeated items
     for (i=0; i<formula.varUnits.length; i++)
-      if (grouping[i] != '')
+      if (sortGrouping[i] != '')
         break
     return i
   }
@@ -794,22 +793,33 @@ function findExactFormulas() : Formulas[] {
   // search for an exact formula match
   // ---------------------------------
   for (var i=0; i<listOfFormulas.length; i++) {           // search each formula
-    var formula = listOfFormulas[i]       // reference
-    var matches = []
-    for (var j=0; j<knowns.length; j++)
-      matches.push(false)
+    var formula = listOfFormulas[i]                       // (formula is a reference)
+
+    var knownMatches = (new Array(knowns.length)).fill(false)
     for (var j=0; j<formula.varUnits.length; j++) {       // search each formula variable
       for (var k=0; k<knowns.length; k++)                 // for a machining known
-        if (formula.varUnits[j].isEqualArray(knowns[k].unitPowers) && matches[k] == false) {
-          matches[k] = true
+        if (formula.varUnits[j].isEqualArray(knowns[k].unitPowers) && knownMatches[k] == false) {
+          knownMatches[k] = true
           break
         }
     }
-    for (var j=0; j<knowns.length; j++)
-      if (matches[j] == false)
-        break
-    // if all knowns are found and all variables have a matching known
-    if ((j == formula.varUnits.length) && knowns.length == formula.varUnits.length) {
+    var formulaMatches = (new Array(formula.varUnits.length)).fill(false)
+    for (var j=0; j<formula.varUnits.length; j++) {       // search each formula variable
+      for (var k=0; k<knowns.length; k++)                 // for a machining known
+        if (formula.varUnits[j].isEqualArray(knowns[k].unitPowers) && formulaMatches[j] == false) {
+          formulaMatches[j] = true
+          break
+        }
+    }
+ 
+    // exact - if all knowns are found and all variables have a matching known
+    var match = false
+    switch (type) {
+      case 'missing': match = (!knownMatches.includes(false) && formulaMatches.includes(false)); break
+      case 'extra':   match = (knownMatches.includes(false) && !formulaMatches.includes(false)); break
+      case 'exact':   match = (!knownMatches.includes(false) && !formulaMatches.includes(false)); break
+    }
+    if (match) { // knowns.length == formula.varUnits.length
       formula.matchVariables()
       var matchSubFormulas = formula.findMatchsForUnknown()
       for (var j=0; j<matchSubFormulas.length; j++) {
@@ -1331,6 +1341,7 @@ function transcendentalOp(top:Measurement, newValue:number) {
   top.value = newValue
 }
 
+
 function unaryButton(op:string)  {
   finishEntry()
   var top = operands[operands.length-1]
@@ -1478,14 +1489,17 @@ function findImplicitFormula() : Formulas[] {
 
 function findFormula() {
   clearButton(false)
-  exactFormulas = findExactFormulas()
-  implicitFormula = findImplicitFormula()
+  exactFormulas       = findMatchingFormulas('exact')
+  missingTermFormulas = findMatchingFormulas('missing')
+  extraTermFormulas   = findMatchingFormulas('extra') 
+  implicitFormula     = findImplicitFormula()
   if (exactFormulas[0])
     listedFormulas = exactFormulas
   else
     listedFormulas = implicitFormula
   inxFormulas = 0
   populateList()
+  
 }
 
 
@@ -1506,9 +1520,13 @@ function populateList() {
   if (formula) {
     formula.matchVariables()
     setMessage(formula.desc + ': ' + formula.prettyMatching())
-    var top = new Measurement(formula.solve(), knowns[0].unitPowers, knowns[0].unitNames, knowns[0].complexUnits, knowns[0].formulaVar)
-    knowns[0] = top
-    setDisplay(top.toString())
+    
+    if (listedFormulas == missingTermFormulas) 
+      setDisplay('no solution, missing term(s)')
+    else {
+      knowns[0] = new Measurement(formula.solve(), knowns[0].unitPowers, knowns[0].unitNames, knowns[0].complexUnits, knowns[0].formulaVar)
+      setDisplay(knowns[0].toString())
+    }
 
     document.getElementById('formula').innerHTML = formula.desc + ': ' + formula.prettyMatching()
     for (var i=0; i<9; i++)
@@ -1722,6 +1740,7 @@ function keyButton(evnt:Event): void {
   if (elemt.innerHTML != '2nd' && currentMode == 'mode-2nd')
     setButtonMode('mode-norm')
 
+  // show keypress on calculator
   elemt.style.borderStyle = 'inset'
   elemt.style.opacity = '.5'
   var closure = function() { elemt.style.borderStyle = 'outset'; elemt.style.opacity = '1' } 
@@ -1729,6 +1748,7 @@ function keyButton(evnt:Event): void {
  
   // TODO debug()
 } // function keyButton
+
 
 function cancelButton() {
   document.getElementById('constTreeDiv').style.display = 'none'
@@ -1738,11 +1758,13 @@ function cancelButton() {
   document.getElementById('calculator').hidden = false
 }
 
+
 function exactListButton() {
   listedFormulas = exactFormulas
   inxFormulas = 0
   populateList()
 }
+
 
 function missingListButton() {
   listedFormulas = missingTermFormulas
@@ -1750,11 +1772,13 @@ function missingListButton() {
   populateList()
 }
 
+
 function extraListButton() {
   listedFormulas = extraTermFormulas
   inxFormulas = 0
   populateList()
 }
+
 
 function implicitListButton() {
   listedFormulas = implicitFormula
@@ -1762,10 +1786,12 @@ function implicitListButton() {
   populateList()
 }
 
+
 function rightArrowListButton() {
   inxFormulas++
   populateList()
 }
+
 
 function leftArrowListButton() {
   inxFormulas--
@@ -1807,7 +1833,7 @@ function setupScroll() {
   // after it fires the onload event
   setTimeout(scrollTo, 0, 0, 1)
 }
-// window.onload = setupScroll
+
 
 var lastWidth = 0
 function onResize() {
@@ -1820,9 +1846,9 @@ function onResize() {
   setupScroll()
 }
 window.onresize = onResize
-// TODO, sample code seems to have this, but page doesn't seem loaded at this point so fails, onResize()
 
 
+// Keyboard handler for use on computer
 // 0-9, ., +, -, *, /, =, (, ), E(for EE), M(for +/-), Esc(for CE/C), return(another =)
 document.addEventListener('keydown', handleKeydown);
 function handleKeydown(e) {
