@@ -22,6 +22,7 @@ const arrayOfUnits = [
   ['K',           'K',        'temperature','kelvin',           1],
   ['cd',          'cd',       'other',      'candela',          1],
   ['mol',         'mol',      'other',      'mole',             1],
+  ['rad',         'rad',      'other',      'radian',           1],
   ['kg',          'mg',       'mass',       'milligram',        1e-6],
   ['kg',          'g',        'mass',       'gram',             1e-3],
   ['kg',          't',        'mass',       'metric ton',       1000],
@@ -107,37 +108,52 @@ const arrayOfUnits = [
   ['kg/s2 A',     'T',        'electromag', 'tesla',            1],
   ['kg m2/s2 A2', 'H',        'electromag', 'henry',            1],
   ['cd/m2',       'lx',       'other',      'lux',              1],
+  ['rad',         'deg',      'other',      'degree',           Math.PI/180],
 ]
 
 const arrayOfConstants = [
 // short-units       value              name   group      desc                                  alt-name
 // alt-name are used in formula equations, must start A-Z or a-z and contain only numbers, letters or _
   ['1',              Math.PI,           'π',  'basic',    'pi',                                 'pi'],
-  // from Physics Text Book
-  ['1/mol',          6.02214076E23,     'L',  'physics',  'Avogadro constant'],
-  ['kg m2/s2 K',     1.380649E-23,      'k',  'physics',  'Boltzmann constant'],
-  ['kg m3/s4 A2',    8.9875517923E9,    'ke', 'physics',  'Coulomb constant'],
-  ['A s',            1.602176634E-19,   'e',  'particle', 'elementry charge'],
-  ['kg m2/s2 K mol', 8.31446261815324,  'R',  'physics',  'molar gas constant'],
-  ['m3/kg s2',       6.6743E-11,        'G',  'physics',  'newtonian gravitational constant'],
-  ['kg',             9.1093837015E-31,  'Me', 'particle', 'electron mass'],
-  ['kg',             1.67262192369E-27, 'Mp', 'particle', 'proton mass'],
-  ['kg',             1.67492749804E-27, 'Mn', 'particle', 'neutron mass'],
-  ['s4 A2/m3 kg',    8.8541878128E-12,  'ε₀', 'physics',  'vacuum electric permittivity',       'epsilon0'],
-  ['m/s2 A2',        1.25663706212E-6,  'µ₀', 'physics',  'vacuum magnetic permittivity',       'mu0'],
-  ['kg m2/s',        6.62607015E-34,    'h',  'particle', 'planck constant'],
-  ['m/s',            299792458,         'c',  'physics',  'speed of light'],
-  ['kg',             1.6605390666E-27,  'u',  'physics',  'unified mass unit'],
-  // extras
-  ['kg m2/s',        1.054571817E-34,   'ħ',  'particle', 'reduced planck constant',            'hbar'],
-  ['kg m2/s3 A2',    376.730313668,     'Z₀', 'physics',  'characteristic impedance of vacuum', 'Z0'],
-  ['s3 A2/kg m2',    7.748091729E-5,    'G₀', 'physics',  'conductance quantum',                'G0'],
-  // astronomy
-  ['m/s2',           9.80665,           'g₀', 'astronomy','standard gravity',                   'g0'],
-  ['kg',             1.98847E30,        'M⊙', 'astronomy','mass of Sun',                        'Msun'],
-  ['kg',             5.9722E24,         'M🜨', 'astronomy','mass of Earth',                      'Mearth'],
-  ['m',              149597870700,      'au', 'astronomy','astronomical unit length'],
-  ['m',              6378137,           'R🜨', 'astronomy','equatorial radius of Earth',         'Rearth'],
+  // NIST - Fundamental Physical Constants — Frequently used constants
+  ['m/s',            299792458,         'c',  'electromag','speed of light'],
+  ['m3/kg s2',       6.6743E-11,        'G',  'astronomy', 'newtonian gravitational constant'],
+  ['kg m2/s',        6.62607015E-34,    'h',  'particle',  'planck constant'],
+  ['kg m2/s',        1.054571817E-34,   'ħ',  'particle',  'reduced planck constant',            'hbar'],
+  ['A s',            1.602176634E-19,   'e',  'particle',  'elementry charge'],
+  ['m/s2 A2',        1.25663706212E-6,  'µ₀', 'electromag','vacuum magnetic permittivity',       'mu0'],
+  ['s4 A2/m3 kg',    8.8541878128E-12,  'ε₀', 'electromag','vacuum electric permittivity',       'epsilon0'],
+  ['s2 A/kg m2',     483597.9E9,        'Kj', 'electromag','Josephson constant'],
+  ['kg m2/s3 A2',    25812.807,         'Rk', 'electromag','von Klitzing constant'],
+  ['kg m2/s2 A',     2.067833848E-15,   'Φ₀', 'electromag','magnetic flux quantum',              'phi0'],
+  ['s3 A2/kg m2',    7.748091729E-5,    'G₀', 'electromag','conductance quantum',                'G0'],
+  ['kg',             9.1093837015E-31,  'Me', 'particle',  'electron mass'],
+  ['kg',             1.67262192369E-27, 'Mp', 'particle',  'proton mass'],
+  ['1',              1836.15267343,     'Mp/e','particle', 'proton to electron mass ratio',      'Mp2Me'],   
+  ['1',              7.2973525693E-3,   'α',  'particle',  'fine structure constant',            'alpha'],
+  ['1',              137.035999084,     '1/α','particle',  'inverse fine structure constant',    'alpha1'],
+  ['1/s',            3.2898419602508E15,'cR∞','particle',  'Rydberg frequency',                  'cRinfity'],
+  ['kg m2/s2 K',     1.380649E-23,      'k',  'thermodyn', 'Boltzmann constant'],
+  ['1/mol',          6.02214076E23,     'L',  'particle',  'Avogadro constant'],
+  ['kg m2/s2 K mol', 8.31446261815324,  'R',  'thermodyn', 'molar gas constant'],
+  ['s A/mol',        96485.33212,       'F',  'electromag','Faraday constant'],
+  ['kg/s3 K4',       5.670374419E-8,    'σ',  'thermodyn', 'Stefan-Boltzmann constant',          'sigma'],
+  ['kg m2/s2',       1.602176634E-19,   'eV', 'electromag','electronvolt'],
+  ['kg',             1.6605390666E-27,  'u',  'particle',  'unified mass unit'],
+  // EXTRAS
+  ['kg',             1.67492749804E-27, 'Mn', 'particle',  'neutron mass'],
+  ['kg m3/s4 A2',    8.9875517923E9,    'ke', 'electromag','Coulomb constant'],
+  ['kg m2/s3 A2',    376.730313668,     'Z₀', 'electromag','characteristic impedance of vacuum', 'Z0'],
+  ['m2/s2',          333550,            '♆HF','thermodyn', 'heat of fusion by mass of water',   'h2oHF'], 
+  ['m2/s2',          2257000,           '♆HV','thermodyn', 'heat of vaporization by mass of water','h2oHV'], 
+  ['m2/s2 K',        4184,              '♆HC','thermodyn', 'heat capacity of water by mass at 20C','h2oHC'],
+  
+  // ASTRONOMY
+  ['m/s2',           9.80665,           'g₀', 'astronomy', 'standard gravity',                   'g0'],
+  ['kg',             1.98847E30,        'M⊙', 'astronomy', 'mass of Sun',                        'Msun'],
+  ['kg',             5.9722E24,         'M🜨', 'astronomy', 'mass of Earth',                      'Mearth'],
+  ['m',              149597870700,      'au', 'astronomy', 'astronomical unit length'],
+  ['m',              6378137,           'R🜨', 'astronomy', 'equatorial radius of Earth',         'Rearth'],
 ]
 
 const arrayOfFormula = [
@@ -228,41 +244,41 @@ const arrayOfButtons = [
     ['CE/C', 'CE/C', 'CE/C', 'CE/C'],
     ['π'   , 'π'   , 'm'   , 'π'   ],
     ['LN'  , 'LOG' , 'mm'  , 'c'   ],
-    ['EE'  , 'EE'  , 'km'  , 'h'   ],
-    ['('   , '('   , 'ft'  , 'ħ'   ],
-    [')'   , ')'   , 'in'  , ''    ],
-    ['÷'   , '÷'   , 'mi'  , 'ε₀'  ],
-    ['¹/ₓ' , '¹/ₓ' , '1/UN', ''    ]
+    ['EE'  , 'EE'  , 'km'  , 'µ₀'  ],
+    ['('   , '('   , 'ft'  , 'ε₀'  ],
+    [')'   , ')'   , 'in'  , 'G₀'  ],
+    ['÷'   , '÷'   , 'mi'  , 'Φ₀'  ],
+    ['¹/ₓ' , '¹/ₓ' , '1/UN', 'F'   ]
   ],[
     ['MODE', 'MODE', 'KWN' , ''    ],
-    ['STR' , 'SUM' , 'kg'  , 'µ₀'  ],
-    ['eˣ'  , '10ˣ' , 'g'   , 'Z₀'  ],
-    ['7'   , '7'   , 'mg'  , 'e'   ],
-    ['8'   , '8'   , 'lb'  , 'L'   ],
-    ['9'   , '9'   , 'oz'  , 'k'   ],
-    ['×'   , '×'   , 'gal' , ''    ],
-    ['yˣ'  , 'ˣ√y' , 'l'   , 'R'   ]
+    ['STR' , 'STR' , 'kg'  , 'k'   ],
+    ['eˣ'  , '10ˣ' , 'g'   , 'R'   ],
+    ['7'   , '7'   , 'mg'  , 'σ'   ],
+    ['8'   , '8'   , 'lb'  , '♆HF' ],
+    ['9'   , '9'   , 'oz'  , '♆HV' ],
+    ['×'   , '×'   , 'l'   , '♆HC' ],
+    ['yˣ'  , 'ˣ√y' , 'gal' , 'eV'  ]
   ],[
     ['2nd' , '2nd' , 'UNKN', ''    ],
-    ['RCL' , 'EXCH', 's'   , ''    ],
-    ['SIN' ,'SIN⁻¹','min'  , ''    ],
-    ['4'   , '4'   , 'h'   , ''    ],
-    ['5'   , '5'   , 'd'   , ''    ],
-    ['6'   , '6'   , 'yr'  , ''    ],
-    ['-'   , '-'   , ''    , ''    ],
-    ['√x'  , '³√x' , ''    , ''    ]
+    ['RCL' , 'RCL' , 's'   , 'h'   ],
+    ['SIN' ,'SIN⁻¹','min'  , 'ħ'   ],
+    ['4'   , '4'   , 'h'   , 'e'   ],
+    ['5'   , '5'   , 'd'   , 'cR∞' ],
+    ['6'   , '6'   , 'yr'  , 'L'   ],
+    ['-'   , '-'   , 'rad' , 'u'   ],
+    ['√x'  , '³√x' , 'deg' , 'ke'  ]
   ],[
     ['CNST', 'CNST', ''    , 'CNST'],
-    [''    , ''    , 'A'   , ''    ],
-    ['COS' ,'COS⁻¹', 'V'   , ''    ],
-    ['1'   , '1'   , 'Ω'   , ''    ],
-    ['2'   , '2'   , 'J'   , ''    ],
-    ['3'   , '3'   , 'W'   , ''    ],
-    ['+'   , '+'   , 'N'   , ''    ],
-    ['x²'  , 'x³'  , 'Pa'  , ''    ]
+    ['SUM' , 'SUM' , 'A'   , 'Me'  ],
+    ['COS' ,'COS⁻¹', 'V'   , 'Mp'  ],
+    ['1'   , '1'   , 'Ω'   , 'Mp/e'],
+    ['2'   , '2'   , 'J'   , 'Mn'  ],
+    ['3'   , '3'   , 'W'   , 'α'   ],
+    ['+'   , '+'   , 'N'   , '1/α' ],
+    ['x²'  , 'x³'  , 'Pa'  , 'Z₀'  ]
   ],[
     ['UNIT', 'UNIT', 'UNIT', ''    ],
-    [''    , ''    , 'K'   , 'G'   ],
+    ['EXCH', 'EXCH', 'K'   , 'G'   ],
     ['TAN', 'TAN⁻¹', '°C'  , 'g₀'  ],
     ['0'   , '0'   , '°F'  , 'M⊙'  ],
     ['.'   , '.'   , 'cd'  , 'M🜨'  ],
@@ -321,7 +337,7 @@ function format(n:number) : string {
 ////////////////////////////////////////////////////////////////////////////////
 
 class ShortUnits {
-  static names = ['kg', 'm', 's', 'K', 'A', 'cd', 'mol']
+  static names = ['kg', 'm', 's', 'K', 'A', 'cd', 'mol', 'rad']
   powers:number[]
 
   // convert a units string (e.g. kg m3, m/s2 or 1/s) of SI units to a units array
@@ -330,7 +346,7 @@ class ShortUnits {
       this.powers = powers.slice()
       return
     }
-    this.powers = [0,0,0,0,0,0,0]
+    this.powers = [0,0,0,0,0,0,0,0]
     var fraction = str.split('/')
     for (var i=0; i<fraction.length; i++) {
       if (fraction[i] == '1')
@@ -368,7 +384,7 @@ class ShortUnits {
 
   toString() : string {
     var ret = ''
-    for (var i=0; i<7; i++) {
+    for (var i=0; i<8; i++) {
       if (this.powers[i] > 1)
         ret += ShortUnits.names[i] + this.powers[i].toString() + ' '
       else if (this.powers[i] == 1)
@@ -378,7 +394,7 @@ class ShortUnits {
     if (ret == '')
       ret = '1'
     ret += '/'
-    for (var i=0; i<7; i++) {
+    for (var i=0; i<8; i++) {
       if (this.powers[i] < -1)
         ret += ShortUnits.names[i] + (-this.powers[i].toString()) + ' '
       else if (this.powers[i] == -1)
@@ -414,7 +430,7 @@ class Unit {
 
   nPowers() : number {
     var n = 0
-    for (var i=0; i<7; i++)
+    for (var i=0; i<8; i++)
       if (this.units.powers[i] != 0)
         n++
     return n
@@ -429,16 +445,16 @@ class Unit {
   }
 
   index() : number {
-    for (var i=0; i<7; i++)
+    for (var i=0; i<8; i++)
       if (this.units.powers[i] != 0)
         return i
     return -1
   }
 
   names() : string[] {
-    var un = ['','','','','','','']
+    var un = ['','','','','','','','']
     if (this.isComplex()) {
-      for (var i=0; i<7; i++)
+      for (var i=0; i<8; i++)
         if (this.units.powers[i] != 0)
           un[i] = ShortUnits.names[i]
     }
@@ -512,12 +528,12 @@ class Measurement {
     this.complexUnits = complex
     this.formulaVar = formulaVar
     if (unitPowers == undefined)
-      this.unitPowers = [0,0,0,0,0,0,0]
+      this.unitPowers = [0,0,0,0,0,0,0,0]
     else
       this.unitPowers = unitPowers.slice()
     if (unitNames == undefined) {
       this.unitNames = []
-      for (var i=0; i<7; i++)
+      for (var i=0; i<8; i++)
         if (this.unitPowers[i] == 0)
           this.unitNames.push('')
         else
@@ -536,9 +552,9 @@ class Measurement {
     var unit = findUnit(this.unitPowers, this.complexUnits)
     if (unit)
       return unit.factor
-    for (var i=0; i<7; i++) {
+    for (var i=0; i<8; i++) {
       if (this.unitPowers[i] != 0) {
-        var searchUnit = [0,0,0,0,0,0,0]
+        var searchUnit = [0,0,0,0,0,0,0,0]
         searchUnit[i] = 1  // search unit has a single unit type (mass, length, time, etc.)
         unit = findUnit(searchUnit, this.unitNames[i])
         if (unit)
@@ -552,7 +568,7 @@ class Measurement {
     const superscripts = ['', '', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
     var unit : Unit
 
-    if (this.unitPowers.toString() == [0,0,0,0,0,0,0].toString() && currentMode != 'mode-unit')
+    if (this.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString() && currentMode != 'mode-unit')
       return format(this.value)
 
     unit = findUnit(this.unitPowers, this.complexUnits)         // try to find an exact unit power and name match for a complex type, such as (N)ewton or (W)att
@@ -563,9 +579,9 @@ class Measurement {
     var factor = 1
     var numerator = ''
     var denominator = ''
-    for (var i=0; i<7; i++) {
+    for (var i=0; i<8; i++) {
       if (this.unitPowers[i] != 0) {
-        var searchUnit = [0,0,0,0,0,0,0]
+        var searchUnit = [0,0,0,0,0,0,0,0]
         searchUnit[i] = 1  // search unit has a single unit type (mass, length, time, etc.)
         unit = findUnit(searchUnit, this.unitNames[i])
         if (unit) {
@@ -598,7 +614,7 @@ class Measurement {
 
   nPowers() : number {
     var n = 0
-    for (var i=0; i<7; i++)
+    for (var i=0; i<8; i++)
       if (this.unitPowers[i] != 0)
         n++
     return n
@@ -935,7 +951,9 @@ function setButtonMode(newMode:string) {
             button.style.backgroundColor = buttonColors[2]
           else if (unit.units.isEqual(new ShortUnits('s')))
             button.style.backgroundColor = buttonColors[3]
-          else if (unit.units.isEqual(new ShortUnits('K')) || unit.units.isEqual(new ShortUnits('A')) || unit.units.isEqual(new ShortUnits('mol')) || unit.units.isEqual(new ShortUnits('cd')))
+          else if (unit.units.isEqual(new ShortUnits('K')) || unit.units.isEqual(new ShortUnits('A')) || 
+          unit.units.isEqual(new ShortUnits('mol')) || unit.units.isEqual(new ShortUnits('cd')) || 
+          unit.units.isEqual(new ShortUnits('rad')))
             button.style.backgroundColor = buttonColors[4]
           else
             button.style.backgroundColor = buttonColors[5]
@@ -1159,7 +1177,7 @@ function evaluateTopOperator() : Measurement {
       break
     case '*':
       ret.value = x.value * y.value
-      for (i=0; i<7; i++) {
+      for (i=0; i<8; i++) {
         ret.unitPowers[i] = x.unitPowers[i] + y.unitPowers[i]
         if (y.unitNames[i] != '')
           ret.unitNames[i] = y.unitNames[i]   // x unit name was defaulted, but may be blank
@@ -1167,7 +1185,7 @@ function evaluateTopOperator() : Measurement {
       break
     case '/':
       ret.value = x.value / y.value
-      for (i=0; i<7; i++) {
+      for (i=0; i<8; i++) {
         ret.unitPowers[i] = x.unitPowers[i] - y.unitPowers[i]
         if (y.unitNames[i] != '')
           ret.unitNames[i] = y.unitNames[i]   // x unit name was defaulted, but may be blank
@@ -1177,7 +1195,7 @@ function evaluateTopOperator() : Measurement {
       y.value = 1 / y.value
       // fallthru
     case '^':
-      if (y.unitPowers.toString() == [0,0,0,0,0,0,0].toString())
+      if (y.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString())
         powMeasurement(ret, y.value)
       else
         setMessage('Power must be scalar!')
@@ -1255,10 +1273,10 @@ function selectUnitByName(name:string, tree:boolean=false)  {
 
   if (unit) {
     if (unit.isComplex() || unit.isComposite()) {
-      if (top.unitPowers.toString() != [0,0,0,0,0,0,0].toString() && top.unitPowers.toString() != unit.units.powers.toString())        
+      if (top.unitPowers.toString() != [0,0,0,0,0,0,0,0].toString() && top.unitPowers.toString() != unit.units.powers.toString())        
         setMessage("Units differ, can't convert!")
       else {
-        if (top.unitPowers.toString() == [0,0,0,0,0,0,0].toString()) {
+        if (top.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString()) {
           top.value -= unit.offset
           top.value *= unit.factor ** unitSign      // convert scalar to SI units internally
         }
@@ -1321,7 +1339,7 @@ function selectConstByName(button:string, tree:boolean=false) {
 function powMeasurement(top:Measurement, power:number) {
   // multiply the units by power, result needs to be integers for any valid measurement
   var undo = top.unitPowers.slice()
-  for (var i=0; i<7; i++) {
+  for (var i=0; i<8; i++) {
     top.unitPowers[i] *= power
     if (!Number.isInteger(top.unitPowers[i])) {
       top.unitPowers = undo
@@ -1334,10 +1352,13 @@ function powMeasurement(top:Measurement, power:number) {
 
 
 function transcendentalOp(top:Measurement, newValue:number) {
-  if (top.nPowers() != 0) {
+  var pow = top.unitPowers.slice()
+  pow[7] = 0    // ignore radians term
+  if (pow.toString() != [0,0,0,0,0,0,0,0].toString()) {
     setMessage('Transcendental functions require scalar!')
     return
   }
+  top.unitPowers = [0,0,0,0,0,0,0,0]
   top.value = newValue
 }
 
@@ -1345,7 +1366,7 @@ function transcendentalOp(top:Measurement, newValue:number) {
 function unaryButton(op:string)  {
   finishEntry()
   var top = operands[operands.length-1]
-  switch (op) {
+  switch (op.toLowerCase()) {
     case '1/x':
       powMeasurement(top, -1)
       break
@@ -1372,12 +1393,15 @@ function unaryButton(op:string)  {
       break
     case 'sin-1':
       transcendentalOp(top, Math.asin(top.value))
+      selectUnitByName('rad')
       break
     case 'cos-1':
       transcendentalOp(top, Math.acos(top.value))
+      selectUnitByName('rad')
       break
     case 'tan-1':
       transcendentalOp(top, Math.atan(top.value))
+      selectUnitByName('rad')
       break
     case 'log':
       transcendentalOp(top, Math.log10(top.value))
@@ -1421,8 +1445,8 @@ function findImplicitFormula() : Formulas[] {
     for (var i=-4; i<=end; i++) {
       pows[depth] = i
       var abs = 0
-      var sums2 = [0,0,0,0,0,0,0]
-      for (var k=0; k<7; k++) {
+      var sums2 = [0,0,0,0,0,0,0,0]
+      for (var k=0; k<8; k++) {
         var element = sums[k] + i * knowns[depth].unitPowers[k]
         sums2[k] = element
         abs += Math.abs(element)  // will be 0 if all elements are 0
@@ -1441,7 +1465,7 @@ function findImplicitFormula() : Formulas[] {
   }
 
   if (knowns.length >= 3 && knowns[0].nPowers() != 0)
-    recurse(0, [0,0,0,0,0,0,0])
+    recurse(0, [0,0,0,0,0,0,0,0])
   if (nSolutions == 0)
     return []
 
@@ -1499,22 +1523,21 @@ function findFormula() {
     listedFormulas = implicitFormula
   inxFormulas = 0
   populateList()
-  
 }
 
 
 function populateList() {
   document.getElementById('pageListText').innerHTML = (inxFormulas+1).toString() + ' of ' + listedFormulas.length.toString();
-  (<HTMLInputElement>document.getElementById('exactButton')).disabled                = (exactFormulas.length == 0)
-  document.getElementById('exactButton').style.textDecoration                        = ((listedFormulas === exactFormulas)       ? 'underline' : '');
-  (<HTMLInputElement>document.getElementById('missingButton')).disabled              = (missingTermFormulas.length == 0)
-  document.getElementById('missingButton').style.textDecoration                      = ((listedFormulas === missingTermFormulas) ? 'underline' : '');
-  (<HTMLInputElement>document.getElementById('extraButton')).disabled                = (extraTermFormulas.length == 0)
-  document.getElementById('extraButton').style.textDecoration                        = ((listedFormulas === extraTermFormulas)   ? 'underline' : '');
-  (<HTMLInputElement>document.getElementById('implicitButton')).disabled             = (implicitFormula.length == 0)
-  document.getElementById('implicitButton').style.textDecoration                     = ((listedFormulas === implicitFormula)     ? 'underline' : '');
-  (<HTMLInputElement>document.getElementById('leftArrowButton')).disabled            = (inxFormulas <= 0);
-  (<HTMLInputElement>document.getElementById('rightArrowButton')).disabled           = (inxFormulas >= listedFormulas.length-1)
+  (<HTMLInputElement>document.getElementById('exactButton')).disabled      = (exactFormulas.length == 0)
+  document.getElementById('exactButton').style.textDecoration              = ((listedFormulas === exactFormulas)       ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('missingButton')).disabled    = (missingTermFormulas.length == 0)
+  document.getElementById('missingButton').style.textDecoration            = ((listedFormulas === missingTermFormulas) ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('extraButton')).disabled      = (extraTermFormulas.length == 0)
+  document.getElementById('extraButton').style.textDecoration              = ((listedFormulas === extraTermFormulas)   ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('implicitButton')).disabled   = (implicitFormula.length == 0)
+  document.getElementById('implicitButton').style.textDecoration           = ((listedFormulas === implicitFormula)     ? 'underline' : '');
+  (<HTMLInputElement>document.getElementById('leftArrowButton')).disabled  = (inxFormulas <= 0);
+  (<HTMLInputElement>document.getElementById('rightArrowButton')).disabled = (inxFormulas >= listedFormulas.length-1)
 
   var formula = listedFormulas[inxFormulas]
   if (formula) {
@@ -1522,7 +1545,7 @@ function populateList() {
     setMessage(formula.desc + ': ' + formula.prettyMatching())
     
     if (listedFormulas == missingTermFormulas) 
-      setDisplay('no solution, missing term(s)')
+      setDisplay('missing term(s)!')
     else {
       knowns[0] = new Measurement(formula.solve(), knowns[0].unitPowers, knowns[0].unitNames, knowns[0].complexUnits, knowns[0].formulaVar)
       setDisplay(knowns[0].toString())
@@ -1617,8 +1640,8 @@ function keyButton(evnt:Event): void {
             break
           case '#':
             top.value = top.value / top.factor()
-            top.unitPowers = [0,0,0,0,0,0,0]
-            top.unitNames = ['','','','','','','']
+            top.unitPowers = [0,0,0,0,0,0,0,0]
+            top.unitNames = ['','','','','','','','']
             setDisplay(top.value.toString())
             break
           default:
@@ -1689,8 +1712,10 @@ function keyButton(evnt:Event): void {
             break
           case 'sin⁻¹':
             unaryButton('sin-1')
+            break
           case 'cos⁻¹':
             unaryButton('cos-1')
+            break
           case 'tan⁻¹':
             unaryButton('tan-1')
             break
@@ -1799,7 +1824,8 @@ function leftArrowListButton() {
 }
 
 
-// FROM: https://gist.github.com/nateps/1172490
+// Hide the address bar in a fullscreen iPhone or Android web app
+// FROM: https://gist.github.com/nateps/1172490, includes setupScroll and onResize
 if (navigator.userAgent.indexOf('Android') >= 0) {
   window.onscroll = function() {
     document.getElementById('page').style.height = window.innerHeight + 'px'
