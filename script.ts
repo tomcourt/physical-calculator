@@ -250,8 +250,8 @@ const arrayOfButtons = [
     ['÷'   , '÷'   , 'mi'  , 'Φ₀'  ],
     ['¹/ₓ' , '¹/ₓ' , '1/UN', 'F'   ]
   ],[
-    ['MODE', 'MODE', 'KWN' , ''    ],
-    ['STR' , 'STR' , 'kg'  , 'k'   ],
+    ['UNIT', 'UNIT', 'UNIT', ''    ],
+    ['STR' , 'SUM' , 'kg'  , 'k'   ],
     ['eˣ'  , '10ˣ' , 'g'   , 'R'   ],
     ['7'   , '7'   , 'mg'  , 'σ'   ],
     ['8'   , '8'   , 'lb'  , '♆HF' ],
@@ -259,8 +259,8 @@ const arrayOfButtons = [
     ['×'   , '×'   , 'l'   , '♆HC' ],
     ['yˣ'  , 'ˣ√y' , 'gal' , 'eV'  ]
   ],[
-    ['2nd' , '2nd' , 'UNKN', ''    ],
-    ['RCL' , 'RCL' , 's'   , 'h'   ],
+    ['CNST', 'CNST', ''    , 'CNST'],
+    ['RCL' , 'EXCH', 's'   , 'h'   ],
     ['SIN' ,'SIN⁻¹','min'  , 'ħ'   ],
     ['4'   , '4'   , 'h'   , 'e'   ],
     ['5'   , '5'   , 'd'   , 'cR∞' ],
@@ -268,8 +268,8 @@ const arrayOfButtons = [
     ['-'   , '-'   , 'rad' , 'u'   ],
     ['√x'  , '³√x' , 'deg' , 'ke'  ]
   ],[
-    ['CNST', 'CNST', ''    , 'CNST'],
-    ['SUM' , 'SUM' , 'A'   , 'Me'  ],
+    ['2nd' , '2nd' , 'KWN' , ''    ],
+    ['HYP' , 'HYP' , 'A'   , 'Me'  ],
     ['COS' ,'COS⁻¹', 'V'   , 'Mp'  ],
     ['1'   , '1'   , 'Ω'   , 'Mp/e'],
     ['2'   , '2'   , 'J'   , 'Mn'  ],
@@ -277,9 +277,9 @@ const arrayOfButtons = [
     ['+'   , '+'   , 'N'   , '1/α' ],
     ['x²'  , 'x³'  , 'Pa'  , 'Z₀'  ]
   ],[
-    ['UNIT', 'UNIT', 'UNIT', ''    ],
-    ['EXCH', 'EXCH', 'K'   , 'G'   ],
-    ['TAN', 'TAN⁻¹', '°C'  , 'g₀'  ],
+    ['FLT+', 'FLT+', 'UNKN', ''    ],
+    ['RAD+', 'RAD+', 'K'   , 'G'   ],
+    ['TAN' ,'TAN⁻¹', '°C'  , 'g₀'  ],
     ['0'   , '0'   , '°F'  , 'M⊙'  ],
     ['.'   , '.'   , 'cd'  , 'M🜨'  ],
     ['±'   , '±'   , 'mol' , 'au'  ],
@@ -293,11 +293,14 @@ var buttonElements = new Map( [
   ['LIST', undefined ],
   ['CNST', undefined ],
   ['2nd',  undefined ],
-  ['1/UN', undefined ]
+  ['1/UN', undefined ],
+  ['HYP',  undefined ],
+  ['RAD+', undefined ],
+  ['FLT+', undefined ],   
 ])
 
 const buttonColorKeys = [
-  ['CE/C','MODE','CNST','UNIT','2nd' ,'LIST','KWN' ,'UNKN','1/UN','#'],
+  ['CE/C','MODE','CNST','UNIT','2nd' ,'LIST','KWN' ,'UNKN','1/UN','#', 'RAD+', 'FLT+', 'HYP'],
   ['.'   ,'±'   ,'0'   ,'1'   ,'2'   ,'3'   ,'4'   ,'5'   ,'6'   ,'7'   ,'8'   ,'9'   ,'EE'],
   ['+'   ,'-'   ,'×'   ,'÷'   ,'='   ,'('   ,')'],
   ['π'   ,'STR' ,'RCL' ,'SIN' ,'COS' ,'TAN' ,'LN'  ,'eˣ'  ,'yˣ' ,'¹/ₓ'  ,'√x'  ,'x²', 'LOG', 
@@ -316,22 +319,44 @@ function hsl(h:number, s:number, l:number) : string
   return `#${f(0)}${f(8)}${f(4)}`;
 }   
 
-const buttonColors = [hsl(30,1,.2), hsl(210,1,.2), hsl(75,1,.2), hsl(270,1,.2), hsl(165,1,.2), hsl(330,1,.2), hsl(0,0,.5)]
+const buttonColors = [hsl(30,1,.2), hsl(210,1,.2), hsl(90,1,.15), hsl(255,1,.15), hsl(165,1,.2), hsl(330,1,.2), hsl(0,0,.5)]
 
 ////////////////////////////////////////////////////////////////////////////////
 
 function format(n:number) : string {
-  var p = n.toPrecision(8)        // x.xxxxxxxx, may also have a leading - (10 or 11 characters)
-  if (/^-?0.0?0?[1-9]/.test(p))   // allow up to 0.00 and still show decimal
-    p = p.substr(0,10)
-  if (p.includes('.') && !p.includes('e')) {
-    p = p.replace(/0+$/, '')      // get rid of trailing 0's after decimal point
-    if (p.substr(p.length-1) == '.')
-      p = p.substr(0, p.length-1) // get rid of trailing decimal point
+  if (!isFinite(n)) 
+    return n.toString()
+  const significantDigits = 8
+
+  var components = ((n.toExponential()).toString()).split('e')
+  var mantisa = parseFloat(components[0])
+  mantisa = parseFloat(mantisa.toFixed(significantDigits-1))  // limit to 8 total mantisa digits
+  var exponent = parseInt(components[1])
+
+  if (fltSciEng == 'FLT+' && exponent < significantDigits && exponent >= -3) {
+    var digits = significantDigits-1
+    if (exponent < 0)
+      digits -= exponent    // always show 8 significant digits
+    return parseFloat(n.toFixed(digits)).toString()
   }
-  if (p.length > 10 || p.includes('e'))
-    return n.toExponential(4)     // x.xxxxe+yy, may also have a leading - (10 or 11 characters)
-  return p
+  else {
+    if (fltSciEng == 'ENG+') {
+      var fix = exponent % 3
+      if (fix == -1) {
+        mantisa *= 100
+        exponent -= 2
+      }
+      else if (fix == -2) {
+        mantisa *= 10
+        exponent -= 1
+      }
+      else {
+        mantisa *= 10**fix
+        exponent -= fix
+      }
+    } 
+    return mantisa.toString() + '×10<sup><small>' + exponent.toString() + '</small></sup>'
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -568,7 +593,7 @@ class Measurement {
     const superscripts = ['', '', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
     var unit : Unit
 
-    if (this.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString() && currentMode != 'mode-unit')
+    if (this.isScalar() && currentMode != 'mode-unit')
       return format(this.value)
 
     unit = findUnit(this.unitPowers, this.complexUnits)         // try to find an exact unit power and name match for a complex type, such as (N)ewton or (W)att
@@ -618,6 +643,16 @@ class Measurement {
       if (this.unitPowers[i] != 0)
         n++
     return n
+  }
+
+  isScalar() : boolean {
+    return this.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString()
+  }
+
+  isScalarOrRadian() : boolean {
+    var pows = this.unitPowers.slice()
+    pows[7] = 0
+    return pows.toString() == [0,0,0,0,0,0,0,0].toString()
   }
 } // end class Measurement
 
@@ -850,7 +885,7 @@ function findMatchingFormulas(type:string) : Formulas[] {
     }
   }
   return found
-}
+} // end function findMatchingFormulas
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -865,6 +900,10 @@ var memory = new Measurement(0)
 
 var unitSign = 1
 var currentMode : string
+
+var hyper = false
+var degRad = 'RAD+'
+var fltSciEng = 'FLT+'
 
 var exactFormulas       : Formulas[]
 var implicitFormula     : Formulas[]    // either 0 or 1
@@ -989,7 +1028,12 @@ function setButtonMode(newMode:string) {
   boldButton('CNST', (currentMode == 'mode-const'))
   boldButton('UNIT', (currentMode == 'mode-unit'))
   boldButton('LIST', (currentMode == 'mode-norm') && nFormulas > 0)
-}
+  boldButton('HYP',  hyper)
+  if (newMode == 'mode-norm' || newMode == 'mode-2nd') {
+    buttonElements.get('RAD+').innerHTML = degRad
+    buttonElements.get('FLT+').innerHTML = fltSciEng
+  }
+} // end window.onload
 
 
 function fillTreeInHTML(listForTree:any[], treeView:string, funcName:string) {
@@ -1061,7 +1105,7 @@ function updateDisplay() {
   if (exponent == '')
     setDisplay(mantisa)
   else
-    setDisplay(mantisa + 'E' + exponent)
+    setDisplay(mantisa + '×10<sup><small>' + exponent.toString() + '</small></sup>')
 }
 
 
@@ -1086,21 +1130,10 @@ function digitButton(symbol : string) {
 
 
 function eeButton() {
-  if (entryMode == 'number' || entryMode == 'infix') {
-    // toggle scientific and decimal modes
-    var val = parseFloat(getDisplay());
-    if (getDisplay().indexOf('E') == -1 &&
-    getDisplay().indexOf('e') == -1)
-      setDisplay(val.toExponential(4))
-    else
-      setDisplay(format(val))
-  }
-  else {
-    if (exponent == '')
-      exponent = '0'
-    entryMode = 'exponent'
-    updateDisplay()
-  }
+  if (exponent == '')
+    exponent = '0'
+  entryMode = 'exponent'
+  updateDisplay()
 }
 
 
@@ -1195,7 +1228,7 @@ function evaluateTopOperator() : Measurement {
       y.value = 1 / y.value
       // fallthru
     case '^':
-      if (y.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString())
+      if (y.isScalar())
         powMeasurement(ret, y.value)
       else
         setMessage('Power must be scalar!')
@@ -1273,10 +1306,10 @@ function selectUnitByName(name:string, tree:boolean=false)  {
 
   if (unit) {
     if (unit.isComplex() || unit.isComposite()) {
-      if (top.unitPowers.toString() != [0,0,0,0,0,0,0,0].toString() && top.unitPowers.toString() != unit.units.powers.toString())        
+      if (!top.isScalar() && top.unitPowers.toString() != unit.units.powers.toString())        
         setMessage("Units differ, can't convert!")
       else {
-        if (top.unitPowers.toString() == [0,0,0,0,0,0,0,0].toString()) {
+        if (top.isScalar()) {
           top.value -= unit.offset
           top.value *= unit.factor ** unitSign      // convert scalar to SI units internally
         }
@@ -1352,9 +1385,7 @@ function powMeasurement(top:Measurement, power:number) {
 
 
 function transcendentalOp(top:Measurement, newValue:number) {
-  var pow = top.unitPowers.slice()
-  pow[7] = 0    // ignore radians term
-  if (pow.toString() != [0,0,0,0,0,0,0,0].toString()) {
+  if (!top.isScalarOrRadian()) {
     setMessage('Transcendental functions require scalar!')
     return
   }
@@ -1383,25 +1414,61 @@ function unaryButton(op:string)  {
       powMeasurement(top, 1/3)
       break
     case 'sin':
-      transcendentalOp(top, Math.sin(top.value))
+      if (hyper) 
+        transcendentalOp(top, Math.sinh(top.value))
+      else {
+        if (degRad == 'DEG+' && top.isScalar())
+          top.value = top.value * Math.PI / 180
+        transcendentalOp(top, Math.sin(top.value))
+      }
       break
     case 'cos':
-      transcendentalOp(top, Math.cos(top.value))
+      if (hyper) 
+        transcendentalOp(top, Math.cosh(top.value))
+      else {
+        if (degRad == 'DEG+' && top.isScalar())
+          top.value = top.value * Math.PI / 180
+        transcendentalOp(top, Math.cos(top.value))
+      }
       break
     case 'tan':
-      transcendentalOp(top, Math.tan(top.value))
+      if (hyper) 
+        transcendentalOp(top, Math.tanh(top.value))
+      else {
+        if (degRad == 'DEG+' && top.isScalar())
+          top.value = top.value * Math.PI / 180
+        transcendentalOp(top, Math.tan(top.value))
+      }
       break
     case 'sin-1':
-      transcendentalOp(top, Math.asin(top.value))
-      selectUnitByName('rad')
+      if (hyper) 
+        transcendentalOp(top, Math.asinh(top.value))
+      else {
+        transcendentalOp(top, Math.asin(top.value))
+        selectUnitByName('rad')
+        if (degRad == 'DEG+')
+          selectUnitByName('deg')
+      }
       break
     case 'cos-1':
-      transcendentalOp(top, Math.acos(top.value))
-      selectUnitByName('rad')
+      if (hyper) 
+        transcendentalOp(top, Math.acosh(top.value))
+      else {
+        transcendentalOp(top, Math.acos(top.value))
+        selectUnitByName('rad')
+        if (degRad == 'DEG+')
+          selectUnitByName('deg')
+      }
       break
     case 'tan-1':
-      transcendentalOp(top, Math.atan(top.value))
-      selectUnitByName('rad')
+      if (hyper) 
+        transcendentalOp(top, Math.atanh(top.value))
+      else {
+        transcendentalOp(top, Math.atan(top.value))
+        selectUnitByName('rad')
+        if (degRad == 'DEG+')
+          selectUnitByName('deg')
+      }
       break
     case 'log':
       transcendentalOp(top, Math.log10(top.value))
@@ -1416,7 +1483,7 @@ function unaryButton(op:string)  {
       transcendentalOp(top, Math.exp(top.value))
       break
   }
-  setDisplay(operands[operands.length-1].toString())
+  setDisplay(top.toString())
 }
 
 
@@ -1642,7 +1709,7 @@ function keyButton(evnt:Event): void {
             top.value = top.value / top.factor()
             top.unitPowers = [0,0,0,0,0,0,0,0]
             top.unitNames = ['','','','','','','','']
-            setDisplay(top.value.toString())
+            setDisplay(top.toString())
             break
           default:
             selectUnitByName(elemt.innerHTML,false)
@@ -1667,6 +1734,37 @@ function keyButton(evnt:Event): void {
             break
           case '2nd':
             setButtonMode((currentMode=='mode-2nd') ? 'mode-norm' : 'mode-2nd')   // any button after this will clear 2-nd mode
+            break
+          case 'hyp':
+            hyper = !hyper
+            setButtonMode(currentMode)
+            break
+          case 'deg+':
+            degRad = 'RAD+'
+            setButtonMode(currentMode)
+            if (top.isScalarOrRadian() && !top.isScalar() && top.unitNames[7] == 'deg')
+              selectUnitByName('rad')
+            break
+          case 'rad+':
+            degRad = 'DEG+'
+            setButtonMode(currentMode)
+            if (top.isScalarOrRadian() && !top.isScalar() && top.unitNames[7] == 'rad')
+              selectUnitByName('deg')        
+            break
+          case 'flt+':
+            fltSciEng = 'SCI+'
+            setButtonMode(currentMode)
+            setDisplay(top.toString())
+            break
+          case 'sci+':
+            fltSciEng = 'ENG+'
+            setButtonMode(currentMode)
+            setDisplay(top.toString())
+            break
+          case 'eng+':
+            fltSciEng = 'FLT+'
+            setButtonMode(currentMode)
+            setDisplay(top.toString())
             break
           case 'list':
             document.getElementById('listDiv').style.display = 'block'
