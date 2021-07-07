@@ -589,16 +589,16 @@ class Measurement {
     return ret
   }
 
-  toString() : string {
+  toDisplayForm() : {value:string, numerator:string, denominator:string} {
     const superscripts = ['', '', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
     var unit : Unit
 
     if (this.isScalar() && currentMode != 'mode-unit')
-      return format(this.value)
+      return {value:format(this.value), numerator:'', denominator:''}
 
     unit = findUnit(this.unitPowers, this.complexUnits)         // try to find an exact unit power and name match for a complex type, such as (N)ewton or (W)att
     if (unit)
-      return format(this.value / unit.factor + unit.offset) + ' ' + unit.name
+      return {value:format(this.value / unit.factor + unit.offset), numerator:unit.name, denominator:''}
 
     // couldn't find any type of match, create a composite SI unit
     var factor = 1
@@ -611,30 +611,25 @@ class Measurement {
         unit = findUnit(searchUnit, this.unitNames[i])
         if (unit) {
           if (this.unitPowers[i] > 0)
-            numerator += ' ' + unit.name + superscripts[this.unitPowers[i]]
+            numerator += unit.name + superscripts[this.unitPowers[i]] + ' '
           else
-            denominator += ' ' + unit.name + superscripts[-this.unitPowers[i]]
+            denominator += unit.name + superscripts[-this.unitPowers[i]] + ' '
           factor *= unit.factor ** this.unitPowers[i]
         }
       }
     }
-    if (currentMode == 'mode-unit') { // show cursor (diamond) if in unit mode
+   if (currentMode == 'mode-unit') { // show cursor (diamond) if in unit mode
       if (unitSign == 1)
-        numerator += ' ◆'
+        numerator += '◆'
       else
-        denominator += ' ◆'
+        denominator += '◆'
     }
-    // assemble the numerator and denominator into a fraction string
-    var unitStr = ''
-    if (denominator !='') {
-      if (numerator == '')
-        numerator = ' 1'
-      unitStr = numerator +'/' + denominator.trim() // leave the leading space
-    }
-    else
-      unitStr = numerator // leave the leading space
-    // ignore offset for complex temperature values. C, F only make sense as simple units
-    return format(this.value / factor) + unitStr
+    if (denominator !='' && numerator == '')
+      numerator = '1'
+    numerator = numerator.trim()
+    denominator = denominator.trim()
+      // ignore offset for complex temperature values. C, F only make sense as simple units
+    return {value:format(this.value / factor), numerator:numerator, denominator:denominator}
   } // end toString
 
   nPowers() : number {
@@ -1091,21 +1086,25 @@ function setMessage(message?:string) {
 }
 
 
-function setDisplay(display:string) {
-  document.getElementById('display').innerHTML = display
-}
-
-
-function getDisplay() : string {
-  return document.getElementById('display').innerHTML
+function setDisplay(measure:Measurement) {
+  var m = measure.toDisplayForm()
+  document.getElementById('value').innerHTML = m.value
+  if (m.numerator == '')
+    document.getElementById('numerator').innerHTML = ''
+  else
+    document.getElementById('numerator').innerHTML = '&nbsp;' + m.numerator + '&nbsp;'
+  if (m.denominator == '')
+    document.getElementById('denominator').innerHTML = ''
+  else
+    document.getElementById('denominator').innerHTML = m.denominator
 }
 
 
 function updateDisplay() {
   if (exponent == '')
-    setDisplay(mantisa)
+    document.getElementById('value').innerHTML = mantisa
   else
-    setDisplay(mantisa + '×10<sup><small>' + exponent.toString() + '</small></sup>')
+    document.getElementById('value').innerHTML = mantisa + '×10<sup><small>' + exponent.toString() + '</small></sup>'
 }
 
 
@@ -1160,7 +1159,9 @@ function plusMinusButton() {
 // call this before doing an operation
 function finishEntry() {
   if (entryMode == 'mantisa' || entryMode == 'exponent') {
-    operands.push(new Measurement(parseFloat(getDisplay())))
+    var disp = document.getElementById('value').innerHTML
+    disp = disp.replace('×10<sup><small>', 'E').replace('</small></sup>', '')
+    operands.push(new Measurement(parseFloat(disp)))
     mantisa = ''
     exponent = ''
     entryMode = 'number'
@@ -1273,7 +1274,7 @@ function infixButton(ch : string) {
         entryMode = 'infix'
         operators.push(ch)
     }
-    setDisplay(operands[operands.length-1].toString())
+    setDisplay(operands[operands.length-1])
 }
 
 
@@ -1291,7 +1292,7 @@ function clearButton(all:boolean)  {
     populateList() // changes title
     setMessage()   // change title back to 'Physical Calculator'
   }
-  setDisplay('0')
+  setDisplay(new Measurement(0))
   mantisa = ''
   exponent = ''
   entryMode = 'number'
@@ -1331,7 +1332,7 @@ function selectUnitByName(name:string, tree:boolean=false)  {
         top.unitNames[unit.index()] = unit.names()[unit.index()]
     }
     top.complexUnits = (unit.isComplex() ? unit.name : '')
-    setDisplay(top.toString())
+    setDisplay(top)
   }
 
   if (tree) {
@@ -1357,7 +1358,7 @@ function selectConstByName(button:string, tree:boolean=false) {
   var cnst = findConstantByName(button)
   if (cnst) {
     operands.push(cnst.toMeasure())
-    setDisplay(operands[operands.length-1].toString())
+    setDisplay(operands[operands.length-1])
   }
 
   if (tree) {
@@ -1483,7 +1484,7 @@ function unaryButton(op:string)  {
       transcendentalOp(top, Math.exp(top.value))
       break
   }
-  setDisplay(top.toString())
+  setDisplay(top)
 }
 
 
@@ -1612,24 +1613,24 @@ function populateList() {
     setMessage(formula.desc + ': ' + formula.prettyMatching())
     
     if (listedFormulas == missingTermFormulas) 
-      setDisplay('missing term(s)!')
+      document.getElementById('value').innerHTML = 'missing term(s)!'
     else {
       knowns[0] = new Measurement(formula.solve(), knowns[0].unitPowers, knowns[0].unitNames, knowns[0].complexUnits, knowns[0].formulaVar)
-      setDisplay(knowns[0].toString())
+      setDisplay(knowns[0])
     }
 
     document.getElementById('formula').innerHTML = formula.desc + ': ' + formula.prettyMatching()
     for (var i=0; i<9; i++)
-      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? knowns[i].formulaVar +' = ' + knowns[i].toString() : '&nbsp')
+      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? knowns[i].formulaVar +' = ' + knowns[i].toDisplayForm() : '&nbsp')
   }
   else {
     var unknown = ((knowns[0].nPowers() == 0) ? '0' : '1')
     setMessage('unknown ' + unknown + ' = ' + (knowns.length-1).toString() + ' known')
 
     document.getElementById('formula').innerHTML = 'no formula found'
-    document.getElementById('list0').innerHTML = 'u = ' + knowns[0].toString()
+    document.getElementById('list0').innerHTML = 'u = ' + knowns[0].toDisplayForm()
     for (var i=1; i<9; i++)
-      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? 'k'+i.toString() +' = ' + knowns[i].toString() : '&nbsp')
+      document.getElementById('list'+i.toString()).innerHTML = ((i<knowns.length) ? 'k'+i.toString() +' = ' + knowns[i].toDisplayForm() : '&nbsp')
   }
 }
 
@@ -1642,7 +1643,7 @@ function toggleUnitMode() {
     setButtonMode('mode-unit')
   unitSign = 1
   finishEntry()
-  setDisplay(operands[operands.length-1].toString())
+  setDisplay(operands[operands.length-1])
 }
 
 
@@ -1703,13 +1704,13 @@ function keyButton(evnt:Event): void {
             break
           case '1/un':
             unitSign = -unitSign
-            setDisplay(top.toString())
+            setDisplay(top)
             break
           case '#':
             top.value = top.value / top.factor()
             top.unitPowers = [0,0,0,0,0,0,0,0]
             top.unitNames = ['','','','','','','','']
-            setDisplay(top.toString())
+            setDisplay(top)
             break
           default:
             selectUnitByName(elemt.innerHTML,false)
@@ -1754,17 +1755,20 @@ function keyButton(evnt:Event): void {
           case 'flt+':
             fltSciEng = 'SCI+'
             setButtonMode(currentMode)
-            setDisplay(top.toString())
+            if (top)
+              setDisplay(top)
             break
           case 'sci+':
             fltSciEng = 'ENG+'
             setButtonMode(currentMode)
-            setDisplay(top.toString())
+            if (top) 
+              setDisplay(top)
             break
           case 'eng+':
             fltSciEng = 'FLT+'
             setButtonMode(currentMode)
-            setDisplay(top.toString())
+            if (top)
+              setDisplay(top)
             break
           case 'list':
             document.getElementById('listDiv').style.display = 'block'
@@ -1837,7 +1841,7 @@ function keyButton(evnt:Event): void {
           case 'rcl':
             if (entryMode == 'number' || entryMode == 'infix') {
               operands.push(memory)  
-              setDisplay(operands[operands.length-1].toString())
+              setDisplay(operands[operands.length-1])
             }
             break
           case 'sum':
@@ -1854,7 +1858,7 @@ function keyButton(evnt:Event): void {
             var temp = top.copy()
             top = memory
             memory = temp
-            setDisplay(top.toString())
+            setDisplay(top)
             break
           } // switch for normal only buttons
       } // else for normal only buttons

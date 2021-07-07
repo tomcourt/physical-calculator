@@ -496,14 +496,14 @@ class Measurement {
         }
         return ret;
     }
-    toString() {
+    toDisplayForm() {
         const superscripts = ['', '', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
         var unit;
         if (this.isScalar() && currentMode != 'mode-unit')
-            return format(this.value);
+            return { value: format(this.value), numerator: '', denominator: '' };
         unit = findUnit(this.unitPowers, this.complexUnits);
         if (unit)
-            return format(this.value / unit.factor + unit.offset) + ' ' + unit.name;
+            return { value: format(this.value / unit.factor + unit.offset), numerator: unit.name, denominator: '' };
         var factor = 1;
         var numerator = '';
         var denominator = '';
@@ -514,28 +514,24 @@ class Measurement {
                 unit = findUnit(searchUnit, this.unitNames[i]);
                 if (unit) {
                     if (this.unitPowers[i] > 0)
-                        numerator += ' ' + unit.name + superscripts[this.unitPowers[i]];
+                        numerator += unit.name + superscripts[this.unitPowers[i]] + ' ';
                     else
-                        denominator += ' ' + unit.name + superscripts[-this.unitPowers[i]];
+                        denominator += unit.name + superscripts[-this.unitPowers[i]] + ' ';
                     factor *= unit.factor ** this.unitPowers[i];
                 }
             }
         }
         if (currentMode == 'mode-unit') {
             if (unitSign == 1)
-                numerator += ' ◆';
+                numerator += '◆';
             else
-                denominator += ' ◆';
+                denominator += '◆';
         }
-        var unitStr = '';
-        if (denominator != '') {
-            if (numerator == '')
-                numerator = ' 1';
-            unitStr = numerator + '/' + denominator.trim();
-        }
-        else
-            unitStr = numerator;
-        return format(this.value / factor) + unitStr;
+        if (denominator != '' && numerator == '')
+            numerator = '1';
+        numerator = numerator.trim();
+        denominator = denominator.trim();
+        return { value: format(this.value / factor), numerator: numerator, denominator: denominator };
     }
     nPowers() {
         var n = 0;
@@ -918,17 +914,23 @@ function setMessage(message) {
         message = 'Physical Calculator';
     document.getElementById('message').innerHTML = message;
 }
-function setDisplay(display) {
-    document.getElementById('display').innerHTML = display;
-}
-function getDisplay() {
-    return document.getElementById('display').innerHTML;
+function setDisplay(measure) {
+    var m = measure.toDisplayForm();
+    document.getElementById('value').innerHTML = m.value;
+    if (m.numerator == '')
+        document.getElementById('numerator').innerHTML = '';
+    else
+        document.getElementById('numerator').innerHTML = '&nbsp;' + m.numerator + '&nbsp;';
+    if (m.denominator == '')
+        document.getElementById('denominator').innerHTML = '';
+    else
+        document.getElementById('denominator').innerHTML = m.denominator;
 }
 function updateDisplay() {
     if (exponent == '')
-        setDisplay(mantisa);
+        document.getElementById('value').innerHTML = mantisa;
     else
-        setDisplay(mantisa + '×10<sup><small>' + exponent.toString() + '</small></sup>');
+        document.getElementById('value').innerHTML = mantisa + '×10<sup><small>' + exponent.toString() + '</small></sup>';
 }
 function digitButton(symbol) {
     if (entryMode == 'number')
@@ -974,7 +976,9 @@ function plusMinusButton() {
 }
 function finishEntry() {
     if (entryMode == 'mantisa' || entryMode == 'exponent') {
-        operands.push(new Measurement(parseFloat(getDisplay())));
+        var disp = document.getElementById('value').innerHTML;
+        disp = disp.replace('×10<sup><small>', 'E').replace('</small></sup>', '');
+        operands.push(new Measurement(parseFloat(disp)));
         mantisa = '';
         exponent = '';
         entryMode = 'number';
@@ -1077,7 +1081,7 @@ function infixButton(ch) {
             entryMode = 'infix';
             operators.push(ch);
     }
-    setDisplay(operands[operands.length - 1].toString());
+    setDisplay(operands[operands.length - 1]);
 }
 function clearButton(all) {
     if (all) {
@@ -1093,7 +1097,7 @@ function clearButton(all) {
         populateList();
         setMessage();
     }
-    setDisplay('0');
+    setDisplay(new Measurement(0));
     mantisa = '';
     exponent = '';
     entryMode = 'number';
@@ -1129,7 +1133,7 @@ function selectUnitByName(name, tree = false) {
                 top.unitNames[unit.index()] = unit.names()[unit.index()];
         }
         top.complexUnits = (unit.isComplex() ? unit.name : '');
-        setDisplay(top.toString());
+        setDisplay(top);
     }
     if (tree) {
         document.getElementById('unitTreeDiv').style.display = 'none';
@@ -1150,7 +1154,7 @@ function selectConstByName(button, tree = false) {
     var cnst = findConstantByName(button);
     if (cnst) {
         operands.push(cnst.toMeasure());
-        setDisplay(operands[operands.length - 1].toString());
+        setDisplay(operands[operands.length - 1]);
     }
     if (tree) {
         document.getElementById('constTreeDiv').style.display = 'none';
@@ -1268,7 +1272,7 @@ function unaryButton(op) {
             transcendentalOp(top, Math.exp(top.value));
             break;
     }
-    setDisplay(top.toString());
+    setDisplay(top);
 }
 function findImplicitFormula() {
     var nSolutions = 0;
@@ -1378,22 +1382,22 @@ function populateList() {
         formula.matchVariables();
         setMessage(formula.desc + ': ' + formula.prettyMatching());
         if (listedFormulas == missingTermFormulas)
-            setDisplay('missing term(s)!');
+            document.getElementById('value').innerHTML = 'missing term(s)!';
         else {
             knowns[0] = new Measurement(formula.solve(), knowns[0].unitPowers, knowns[0].unitNames, knowns[0].complexUnits, knowns[0].formulaVar);
-            setDisplay(knowns[0].toString());
+            setDisplay(knowns[0]);
         }
         document.getElementById('formula').innerHTML = formula.desc + ': ' + formula.prettyMatching();
         for (var i = 0; i < 9; i++)
-            document.getElementById('list' + i.toString()).innerHTML = ((i < knowns.length) ? knowns[i].formulaVar + ' = ' + knowns[i].toString() : '&nbsp');
+            document.getElementById('list' + i.toString()).innerHTML = ((i < knowns.length) ? knowns[i].formulaVar + ' = ' + knowns[i].toDisplayForm() : '&nbsp');
     }
     else {
         var unknown = ((knowns[0].nPowers() == 0) ? '0' : '1');
         setMessage('unknown ' + unknown + ' = ' + (knowns.length - 1).toString() + ' known');
         document.getElementById('formula').innerHTML = 'no formula found';
-        document.getElementById('list0').innerHTML = 'u = ' + knowns[0].toString();
+        document.getElementById('list0').innerHTML = 'u = ' + knowns[0].toDisplayForm();
         for (var i = 1; i < 9; i++)
-            document.getElementById('list' + i.toString()).innerHTML = ((i < knowns.length) ? 'k' + i.toString() + ' = ' + knowns[i].toString() : '&nbsp');
+            document.getElementById('list' + i.toString()).innerHTML = ((i < knowns.length) ? 'k' + i.toString() + ' = ' + knowns[i].toDisplayForm() : '&nbsp');
     }
 }
 function toggleUnitMode() {
@@ -1404,7 +1408,7 @@ function toggleUnitMode() {
         setButtonMode('mode-unit');
     unitSign = 1;
     finishEntry();
-    setDisplay(operands[operands.length - 1].toString());
+    setDisplay(operands[operands.length - 1]);
 }
 function boldButton(name, bold) {
     if (buttonElements.get(name))
@@ -1458,13 +1462,13 @@ function keyButton(evnt) {
                         break;
                     case '1/un':
                         unitSign = -unitSign;
-                        setDisplay(top.toString());
+                        setDisplay(top);
                         break;
                     case '#':
                         top.value = top.value / top.factor();
                         top.unitPowers = [0, 0, 0, 0, 0, 0, 0, 0];
                         top.unitNames = ['', '', '', '', '', '', '', ''];
-                        setDisplay(top.toString());
+                        setDisplay(top);
                         break;
                     default:
                         selectUnitByName(elemt.innerHTML, false);
@@ -1509,17 +1513,20 @@ function keyButton(evnt) {
                     case 'flt+':
                         fltSciEng = 'SCI+';
                         setButtonMode(currentMode);
-                        setDisplay(top.toString());
+                        if (top)
+                            setDisplay(top);
                         break;
                     case 'sci+':
                         fltSciEng = 'ENG+';
                         setButtonMode(currentMode);
-                        setDisplay(top.toString());
+                        if (top)
+                            setDisplay(top);
                         break;
                     case 'eng+':
                         fltSciEng = 'FLT+';
                         setButtonMode(currentMode);
-                        setDisplay(top.toString());
+                        if (top)
+                            setDisplay(top);
                         break;
                     case 'list':
                         document.getElementById('listDiv').style.display = 'block';
@@ -1609,7 +1616,7 @@ function keyButton(evnt) {
                     case 'rcl':
                         if (entryMode == 'number' || entryMode == 'infix') {
                             operands.push(memory);
-                            setDisplay(operands[operands.length - 1].toString());
+                            setDisplay(operands[operands.length - 1]);
                         }
                         break;
                     case 'sum':
@@ -1626,7 +1633,7 @@ function keyButton(evnt) {
                         var temp = top.copy();
                         top = memory;
                         memory = temp;
-                        setDisplay(top.toString());
+                        setDisplay(top);
                         break;
                 }
             }
